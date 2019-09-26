@@ -1,0 +1,19 @@
+# Konfiguration der einzelnen ESPs: Je nach MAC-Adresse, welche Aufgaben habe ich
+# und welche Peripherie ist mit mir verbunden?
+esps:
+  b4:e6:2d:8f:bc:59:
+    te_antriebe:
+      A1.1:
+        - 4_2
+        - 4_3
+        - 4_4
+    ds18b20: 2_1
+    fbh_regler:
+      - A1.1
+
+# Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
+ds18b20:
+  1234589abc: A1.1/luft
+  1234589abc: A1.1/vorlauf
+  1234589abc: A1.1/ruecklauf1
+  1234589abc: A1.1/ruecklauf2
