@@ -1,0 +1,19 @@
+from display import Display
+import drivers.ssd1306 as ssd1306
+from machine import I2C
+
+class Board():
+
+    def __init__(self):
+        self.display = None
+
+    def init_ssd1306i2c(self, reset_pin, scl_pin, sda_pin):
+        print("Initializing SSD1306.")
+        # Reset display.
+        reset_pin.value(0)
+        reset_pin.value(1)
+
+        oled_i2c = I2C(-1, scl=scl_pin, sda=sda_pin)
+        self.display = Display(ssd1306.SSD1306_I2C(128, 64, oled_i2c))
+        self.display.clear()
+        print("SSD1306 initialized.")
