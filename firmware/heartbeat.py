@@ -5,7 +5,7 @@ class Heartbeat(Task):
     def __init__(self, display):
         super().__init__()
         self.display = display
-        self.rhythm = [.05, .1, .1, .9]
+        self.rhythm = [100, 200, 100, 600]
         self.rhythm_index = len(self.rhythm) - 1
         self.countdown = self.interval = 0
 

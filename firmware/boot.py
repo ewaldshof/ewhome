@@ -28,4 +28,4 @@ scheduler.register(heartbeat)
 scheduler.register(network)
 scheduler.register(mqtt)
 
-scheduler.loop_forever(0.02)
+scheduler.start(100)

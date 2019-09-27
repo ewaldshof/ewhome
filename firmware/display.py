@@ -10,7 +10,7 @@ class Display(Task):
         self.network = None
         self.mqtt = None
         self.blip = True
-        self.interval = 1 / 30
+        self.interval = int(1000 / 30)
         self.clear()
 
     def set_network(self, network):
