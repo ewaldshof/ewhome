@@ -10,12 +10,15 @@ class Display(Task):
         self.network = None
         self.mqtt = None
         self.blip = True
-        self.interval = int(1000 / 30)
+        self.mqtt_status = None
+        self.wlan_status = None
+        self.interval = 400
         self.clear()
 
     def set_network(self, network):
         self.network = network
         self.mac = network.mac[-15:]
+        self.redraw()
 
     def set_mqtt(self, mqtt):
         self.mqtt = mqtt
@@ -24,14 +27,20 @@ class Display(Task):
         if line > 5:
             raise RuntimeError("You may only access lines 0 to 5.")
         self.lines[line] = text
+        self.redraw()
 
-    def update(self, scheduler):
+    def show_heartbeat(self, show):
+        self.blip = bool(show)
+        self.redraw()
+
+    def redraw(self):
         # Clear display.
         self.driver.fill(0)
 
         # User-defined lines.
         for row in range(6):
-            self.driver.text(self.lines[row], 0, 8 * row)
+            if self.lines[row] != "":
+                self.driver.text(self.lines[row], 0, 8 * row)
 
         # Status bar.
         self.driver.text(self.mac, 0, 49)
@@ -43,6 +52,16 @@ class Display(Task):
 
         # Show result and update things.
         self.driver.show()
+
+
+    def update(self, scheduler):
+        mqtt_status = "M" if (self.mqtt is not None and self.mqtt.connected) else " "
+        wlan_status = ("WL " + self.network.wlan_msg) if (self.network is not None) else "WL?"
+
+        if mqtt_status != self.mqtt_status or wlan_status != self.wlan_status:
+            self.mqtt_status = mqtt_status
+            self.wlan_status = wlan_status
+            self.redraw()
 
     def clear(self):
         self.driver.fill(0)
