@@ -23,7 +23,10 @@ class MQTT(Task):
     def callback(self, topic, msg):
         for subscription in self.subscriptions:
             if subscription["re"].match(topic):
-                subscription["callback"](topic, msg)
+                try:
+                    subscription["callback"](topic, msg)
+                except Exception as e:
+                    print("Callback {0} failed: {1}".format(subscription["topic"], str(e)))
 
     def set_connected(self, connected):
         if self.connected != connected:
