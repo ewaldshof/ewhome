@@ -13,4 +13,4 @@ scheduler = Scheduler()
 scheduler.register(board.display)
 scheduler.register(network)
 
-scheduler.loop_forever(0.1)
+scheduler.loop_forever(0.02)
