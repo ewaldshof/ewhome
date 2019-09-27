@@ -11,6 +11,7 @@ network = Network()
 board.display.set_network(network)
 
 mqtt = MQTT(network)
+board.display.set_mqtt(mqtt)
 
 scheduler = Scheduler()
 scheduler.register(board.display)

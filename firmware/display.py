@@ -7,6 +7,7 @@ class Display(Task):
         self.driver = driver
         self.mac = "..."
         self.network = None
+        self.mqtt = None
         self.blip = True
         self.rhythm = [.05, .1, .1, .9]
         self.rhythm_index = len(self.rhythm) - 1
@@ -16,14 +17,19 @@ class Display(Task):
         self.network = network
         self.mac = network.mac[-15:]
 
+    def set_mqtt(self, mqtt):
+        self.mqtt = mqtt
+
     def update(self, scheduler):
         # Clear display.
         self.driver.fill(0)
 
         # Status bar.
         self.driver.text(self.mac, 0, 49)
+        if self.mqtt is not None and self.mqtt.connected:
+            self.driver.text("M", 0, 57)
         if self.network is not None:
-            self.driver.text("WLAN " + self.network.wlan_msg, 0, 57)
+            self.driver.text("WL " + self.network.wlan_msg, 16, 57)
         self.driver.text("<3", 113, 57, int(self.blip))
 
         # Show result and update things.
