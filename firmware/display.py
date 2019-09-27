@@ -5,7 +5,7 @@ class Display(Task):
     def __init__(self, driver):
         super().__init__()
         self.driver = driver
-        self.mac = "..."
+        self.mac = ["??"] * 6
         self.lines = [""] * 6
         self.network = None
         self.mqtt = None
@@ -17,7 +17,7 @@ class Display(Task):
 
     def set_network(self, network):
         self.network = network
-        self.mac = network.mac[-15:]
+        self.mac = network.mac.split(":")
         self.redraw()
 
     def set_mqtt(self, mqtt):
@@ -42,8 +42,13 @@ class Display(Task):
             if self.lines[row] != "":
                 self.driver.text(self.lines[row], 0, 8 * row)
 
+        # MAC address.
+        # The display only allows for 16 characters (each 7 pixels wide plus 1 pixel of spacing), but the MAC address
+        # has 17. We cheat by positioning the characters manually.
+        for byte in range(6):
+            self.driver.text(self.mac[byte], 22 * byte + 1, 49)
+
         # Status bar.
-        self.driver.text(self.mac, 0, 49)
         if self.mqtt is not None and self.mqtt.connected:
             self.driver.text("M", 0, 57)
         if self.network is not None:
