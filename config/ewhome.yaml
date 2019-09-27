@@ -1,6 +1,8 @@
 # Konfiguration der einzelnen ESPs: Je nach MAC-Adresse, welche Aufgaben habe ich
 # und welche Peripherie ist mit mir verbunden?
 esps:
+  b4:e6:2d:8f:c8:29:
+    name: Test Tim o. Pins
   b4:e6:2d:8f:bc:59:
     te_antriebe:
       A1.1:
