@@ -14,16 +14,16 @@ class Display(Task):
 
     def set_network(self, network):
         self.network = network
-        self.mac = network.mac[-12:]
+        self.mac = network.mac[-15:]
 
     def update(self, scheduler):
         # Clear display.
         self.driver.fill(0)
 
         # Status bar.
+        self.driver.text(self.mac, 0, 49)
         if self.network is not None:
-            self.driver.text("WLAN " + self.network.wlan_msg, 0, 49)
-        self.driver.text(self.mac, 0, 57)
+            self.driver.text("WLAN " + self.network.wlan_msg, 0, 57)
         self.driver.text("<3", 113, 57, int(self.blip))
 
         # Show result and update things.
