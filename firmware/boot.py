@@ -7,8 +7,10 @@ board = Board()
 board.init()
 
 network = Network()
-board.display.set_mac(network.mac)
+board.display.set_network(network)
 
 scheduler = Scheduler()
 scheduler.register(board.display)
+scheduler.register(network)
+
 scheduler.loop_forever(0.1)
