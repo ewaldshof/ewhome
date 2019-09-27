@@ -1,18 +1,29 @@
 from task import Task
 from umqtt.simple import MQTTClient
+import ure
 
 class MQTT(Task):
 
     SERVER = "mqtt.ewh"
 
+    MQTT_TO_REGEX = {
+        "^\\+/": "[^/]+/",
+        "/\\+$": "/[^/]+",
+        "/\\+/": "/[^/]+/",
+        "/#$": "/.+",
+    }
+
     def __init__(self, network):
         super().__init__()
         self.connected = False
+        self.subscriptions = []
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
 
     def callback(self, topic, msg):
-        print(topic, msg)
+        for subscription in self.subscriptions:
+            if subscription["re"].match(topic):
+                subscription["callback"](topic, msg)
 
     def set_connected(self, connected):
         if self.connected != connected:
@@ -24,16 +35,38 @@ class MQTT(Task):
 
     def on_connect(self):
         print("MQTT connected")
-        self.subscribe("ewh/config")
+        for subscription in self.subscriptions:
+            try:
+                self.client.subscribe(subscription["topic"])
+            except:
+                self.set_connected(False)
 
     def on_disconnect(self):
         print("MQTT disconnected")
 
-    def subscribe(self, topic):
+    def subscribe(self, topic, callback):
+        # Build a regex that converts MQTT wildcards to regexes for subscription filtering.
+        regex = topic
+        for (from_re, to) in MQTT.MQTT_TO_REGEX.items():
+            regex = ure.sub(from_re, to, regex)
+        if regex[0] != "^":
+            regex = "^" + regex
+        if regex[-1] != "$":
+            regex = regex + "$"
+        regex_obj = ure.compile(regex)
+        subscription = {
+            "topic": topic,
+            "re": regex_obj,
+            "callback": callback,
+        }
+        self.subscriptions.append(subscription)
+        sub_id = len(self.subscriptions) - 1
+        print("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
         try:
             self.client.subscribe(topic)
         except:
             self.set_connected(False)
+        return sub_id
 
     def update(self, scheduler):
         if not self.connected:
