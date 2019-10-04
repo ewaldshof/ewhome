@@ -11,6 +11,7 @@ class Network(Task):
         super().__init__()
         self.wlan = net.WLAN(net.STA_IF)
         self.wlan.active(True)
+        self.status = None
         self.mac = hexlify(self.wlan.config("mac"), ":").decode()
         self.ip = "0.0.0.0"
         self.short_ip = "  .0"
@@ -18,6 +19,8 @@ class Network(Task):
 
     def update(self, scheduler):
         status = self.wlan.status()
+        if status == self.status: # no change, do nothing
+            return
         if status == net.STAT_IDLE or status == net.STAT_NO_AP_FOUND:
             self.wlan.connect(Network.ssid, Network.password)
             msg = "Starting"
@@ -34,3 +37,4 @@ class Network(Task):
         else:
             msg = "Unknown"
         self.wlan_msg = msg
+        self.status = status
