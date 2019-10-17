@@ -9,3 +9,6 @@ class Board(BaseBoard):
             scl_pin=Pin(15),
             sda_pin=Pin(4),
         )
+        self.init_ds18x20(
+            ow_pin=Pin(0, Pin.OUT)
+        )

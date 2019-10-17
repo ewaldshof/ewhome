@@ -24,6 +24,7 @@ name = Name(config, board.display)
 
 scheduler = Scheduler()
 scheduler.register(board.display)
+scheduler.register(board.temperature)
 scheduler.register(heartbeat)
 scheduler.register(network)
 scheduler.register(mqtt)
