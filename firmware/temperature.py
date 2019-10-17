@@ -35,8 +35,8 @@ class Temperature(Task):
             # Print the results.
             for sensor in self.sensors:
                 print(sensor)
-            # Reset our update interval to the configured one.
-            self.interval = self.countdown = 1000 * self.interval_s
+            # Reset our update interval to the configured one, minus convert time.
+            self.interval = self.countdown = 1000 * self.interval_s - 750
         else:
             # Request the temperature conversion.
             self.ds.convert_temp()
