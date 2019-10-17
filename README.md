@@ -15,7 +15,7 @@ b4 e6 2d 8f c8 29
 M WL OK: .123 <3
 ```
 
-Die vorletzte Zeile zeigt die letzten 5 Byte der MAC-Adresse des WLAN-Adapters an.
+Die vorletzte Zeile zeigt die MAC-Adresse des WLAN-Adapters an.
 
 In der letzten Zeile finden sich Statusinformationen:
 
