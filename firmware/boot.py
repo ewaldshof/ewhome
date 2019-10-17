@@ -17,6 +17,7 @@ board.display.set_network(network)
 
 mqtt = MQTT(network)
 board.display.set_mqtt(mqtt)
+board.temperature.mqtt = mqtt
 
 config = Config(network, mqtt)
 

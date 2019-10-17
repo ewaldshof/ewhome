@@ -72,6 +72,10 @@ class MQTT(Task):
             self.set_connected(False)
         return sub_id
 
+    def publish(self, topic, message, retain=False):
+        # TODO: error handling if not connected
+        self.client.publish(topic, message, retain)
+
     def update(self, scheduler):
         if not self.connected:
             try:

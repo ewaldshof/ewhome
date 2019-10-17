@@ -3,6 +3,7 @@ from onewire import OneWire
 from task import Task
 import time
 from ubinascii import hexlify
+import ujson
 
 class Temperature(Task):
 
@@ -11,6 +12,7 @@ class Temperature(Task):
         self.pin = pin
         self.interval_s = max(interval_s, 2) # no faster than 2s
         self.converting = False
+        self.mqtt = None
         self.ds = DS18X20(OneWire(pin))
         self.sensors = list(map(Sensor, self.ds.scan()))
         self.interval = self.countdown = 1000 * self.interval_s
@@ -21,6 +23,12 @@ class Temperature(Task):
             for sensor in self.sensors:
                 try:
                     sensor.temperature = self.ds.read_temp(sensor.address)
+                    if self.mqtt:
+                        self.mqtt.publish(
+                            "ewhome/ds18x20/" + sensor.hex_address,
+                            str(sensor),
+                            retain=True,
+                        )
                 except:
                     # Ignore things like CRC errors.
                     pass
@@ -41,10 +49,13 @@ class Sensor:
 
     def __init__(self, address):
         self.address = address
+        self.hex_address = hexlify(self.address).decode("utf-8")
+        self.pretty_address = hexlify(self.address, ":").decode("utf-8")
         self.temperature = None
 
     def __str__(self):
-        return "Temperature Sensor {0} at {1} °C".format(
-            hexlify(self.address, ":").decode("utf-8"),
-            "unknown" if self.temperature is None else self.temperature
-        )
+        return ujson.dumps({
+            "id": self.hex_address,
+            "address": self.pretty_address,
+            "temperature_c": self.temperature,
+        })
