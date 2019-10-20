@@ -28,12 +28,12 @@ for dir in $(find . -type d | cut -c 3-); do
         continue
     fi
     echo "  $dir"
-    rshell --port $PORT mkdir "/pyboard/$dir"
+    rshell --port $PORT cp -r "$dir" "/pyboard/"
 done
 
 echo "Copying files ..."
-for file in $(find . -name '*.py' | cut -c 3-); do
+#for file in $(find . -name '*.py' | cut -c 3-); do
 #for file in $filelist; do
-    echo "  $file"
-    rshell --port $PORT cp "$file" "/pyboard/$file"
-done
+echo "  *.py files"
+rshell --port $PORT cp "*.py" "/pyboard/"
+#done
