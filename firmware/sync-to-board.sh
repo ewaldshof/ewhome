@@ -1,7 +1,8 @@
 #!/bin/sh
 
 export AMPY_DELAY=0.5
-export AMPY_PORT=/dev/tty.SLAB_USBtoUART
+#export AMPY_PORT=/dev/tty.SLAB_USBtoUART
+export AMPY_PORT=COM4
 
 filelist="heating.py
 task.py
