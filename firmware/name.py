@@ -1,9 +1,10 @@
 class Name:
 
     def __init__(self, config, display):
-        self.display = display
-        config.on_update(self.on_update)
-        self.on_update(config)
+        if display:
+            self.display = display
+            config.on_update(self.on_update)
+            self.on_update(config)
 
     def on_update(self, config):
         name = "(not configured)"

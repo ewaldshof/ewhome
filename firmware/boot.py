@@ -13,10 +13,12 @@ board.init()
 heartbeat = Heartbeat(board.display)
 
 network = Network()
-board.display.set_network(network)
+if board.display:
+    board.display.set_network(network)
 
 mqtt = MQTT(network)
-board.display.set_mqtt(mqtt)
+if board.display:
+    board.display.set_mqtt(mqtt)
 board.temperature.mqtt = mqtt
 
 config = Config(network, mqtt)
@@ -24,7 +26,8 @@ config = Config(network, mqtt)
 name = Name(config, board.display)
 
 scheduler = Scheduler()
-scheduler.register(board.display)
+if board.display:
+    scheduler.register(board.display)
 scheduler.register(board.temperature)
 scheduler.register(heartbeat)
 scheduler.register(network)

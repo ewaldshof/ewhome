@@ -20,7 +20,14 @@ class Board():
         reset_pin.value(0)
         reset_pin.value(1)
 
+        print("scl_pin ", scl_pin)
+        print("sda_pin ", sda_pin)
+        
         oled_i2c = I2C(-1, scl=scl_pin, sda=sda_pin)
-        self.display = Display(ssd1306.SSD1306_I2C(128, 64, oled_i2c))
-        self.display.clear()
-        print("SSD1306 initialized.")
+            
+        try:
+            self.display = Display(ssd1306.SSD1306_I2C(128, 64, oled_i2c))
+            self.display.clear()
+            print("SSD1306 initialized.")
+        except OSError as err:
+           print("OS error: {0}".format(err))

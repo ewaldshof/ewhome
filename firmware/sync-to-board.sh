@@ -1,8 +1,12 @@
 #!/bin/sh
 
 export AMPY_DELAY=0.5
-#export AMPY_PORT=/dev/tty.SLAB_USBtoUART
-export AMPY_PORT=COM4
+
+PORT=${1:-"/dev/tty.SLAB_USBtoUART"}
+
+export AMPY_PORT=$PORT
+
+CMD=${2:-"rshell --port $PORT"}
 
 filelist="heating.py
 task.py
@@ -24,12 +28,12 @@ for dir in $(find . -type d | cut -c 3-); do
         continue
     fi
     echo "  $dir"
-    ampy mkdir "$dir" 2>/dev/null
+    rshell --port $PORT mkdir "/pyboard/$dir"
 done
 
 echo "Copying files ..."
 for file in $(find . -name '*.py' | cut -c 3-); do
 #for file in $filelist; do
     echo "  $file"
-    ampy put "$file" "$file"
+    rshell --port $PORT cp "$file" "/pyboard/$file"
 done
