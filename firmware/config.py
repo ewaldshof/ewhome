@@ -6,7 +6,7 @@ class Config:
         self.mac = network.mac
         self.data = {}
         self.mine = None
-        self.version = "0.2.0"
+        self.version = "0.3.0"
         self.listeners = []
         mqtt.subscribe("ewh/config", self.on_mqtt)
 

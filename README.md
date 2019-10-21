@@ -1,6 +1,6 @@
 # ewhome
 
-README.md for Version 0.2.0
+README.md for Version 0.3.0
 
 ## Statusanzeige
 
