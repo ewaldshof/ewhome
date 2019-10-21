@@ -35,4 +35,6 @@ scheduler.register(heartbeat)
 scheduler.register(network)
 scheduler.register(mqtt)
 
+print("Starting scheduler of version {0}".format(__version__))
+
 scheduler.start(100)
