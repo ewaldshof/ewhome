@@ -72,7 +72,10 @@ pipenv run python push-config-to-mqtt.py
 
 Bump2version ist eine aktuellere Version von bumpversion. Es verändert die Versionen in den Dateien und erstellt in git auf Wunsch Tag und commit. (Der Schalter -n führt einen dry-run durch.)
 
+Siehe auch: [Versioning using bumpversion](https://medium.com/@williamhayes/versioning-using-bumpversion-4d13c914e9b8)
+
 Beispielaufruf:
 ```sh
-pipenv run python push-config-to-mqtt.py
+bump2version --tag --commit minor
+git push origin master --tags
 ```
