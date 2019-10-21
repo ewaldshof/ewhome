@@ -8,7 +8,7 @@ Die Boards sind mit 8 Zeilen à 16 Zeichen Monochrom-Displays ausgestattet, di
 
 ```text
 Name d. Boards
-
+Version der Software
 
 
 
@@ -39,6 +39,9 @@ Ein Board, das noch kein aktuelles MicroPython aufgespielt bekommen hat, lässt 
 2. Firmware-Image von http://micropython.org/download herunterladen. Der Ewaldshof benutzt ESP32-Boards.
 3. Firmware flashen mittels `esptool.py -p /dev/ttyS0 write_flash 0x1000 esp32-20190529-v1.11.bin`. Dabei natürlich `ttyS0` mit dem korrekten Port ersetzen und auch den Namen der Firmware-Datei wenn nötig anpassen.
 
+fw_flash.sh [<Serial Port>]
+Default für Serial Port: "/dev/tty.SLAB_USBtoUART"
+
 Alternativ:
 
 ```sh
@@ -49,10 +52,13 @@ Alternativ:
 Der Source Code liegt im Verzeichnis "firmware". Übertragung z.B. mit Hilfe des Scripts firmware/sync-to-board.sh
 rshell muss für das Script installiert sein.
 
+sync-to-board.sh [<Serial Port>]
+Default für Serial Port: "/dev/tty.SLAB_USBtoUART"
+
 Beispielaufruf:
 ```sh
 cd firmware
-./sync-to-board.sh
+./sync-to-board.sh COM4
 ```
 
 
