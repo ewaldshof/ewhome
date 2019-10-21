@@ -7,6 +7,8 @@ from name import Name
 from mqtt import MQTT
 from task import Scheduler
 
+__version__ = "0.1.1"
+
 board = Board()
 board.init()
 
