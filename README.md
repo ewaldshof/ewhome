@@ -1,5 +1,7 @@
 # ewhome
 
+README.md for Version 0.1.1
+
 ## Statusanzeige
 
 Die Boards sind mit 8 Zeilen à 16 Zeichen Monochrom-Displays ausgestattet, die folgende Informationen zeigen:
@@ -62,5 +64,15 @@ Beispielaufruf:
 
 ```sh
 cd config
+pipenv run python push-config-to-mqtt.py
+```
+
+
+## Bump2version
+
+Bump2version ist eine aktuellere Version von bumpversion. Es verändert die Versionen in den Dateien und erstellt in git auf Wunsch Tag und commit. (Der Schalter -n führt einen dry-run durch.)
+
+Beispielaufruf:
+```sh
 pipenv run python push-config-to-mqtt.py
 ```
