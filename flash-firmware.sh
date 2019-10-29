@@ -25,4 +25,4 @@ esac
 
 esptool.py --chip esp32 --port "$PORT" erase_flash
 
-esptool.py --chip esp32 --port "$PORT" --baud 460800 write_flash -z 0x1000 "$BIN_FILE"
+esptool.py --chip esp32 --port "$PORT" write_flash -z 0x1000 "$BIN_FILE"
