@@ -7,7 +7,7 @@ import ujson
 
 class Temperature(Task):
 
-    def __init__(self, pin, interval_s=2):
+    def __init__(self, pin, interval_s=10):
         super().__init__()
         self.pin = pin
         self.interval_s = max(interval_s, 2) # no faster than 2s
