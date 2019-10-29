@@ -1,6 +1,4 @@
-# ewhome
-
-README.md for Version 0.3.0
+# ewhome 0.3.0
 
 ## Statusanzeige
 
@@ -8,7 +6,7 @@ Die Boards sind mit 8 Zeilen à 16 Zeichen Monochrom-Displays ausgestattet, di
 
 ```text
 Name d. Boards
-Version der Software
+0.3.0
 
 
 
@@ -17,7 +15,7 @@ b4 e6 2d 8f c8 29
 M WL OK: .123 <3
 ```
 
-Die vorletzte Zeile zeigt die MAC-Adresse des WLAN-Adapters an.
+Die zweite Zeile zeigt die Softwareversion an, die vorletzte Zeile die MAC-Adresse des WLAN-Adapters.
 
 In der letzten Zeile finden sich Statusinformationen:
 
@@ -81,14 +79,16 @@ cd config
 pipenv run python push-config-to-mqtt.py
 ```
 
+# Bump2version
 
-## Bump2version
+Bump2version ist eine aktuellere Version von bumpversion.
+Es verändert die Versionsnummern in den Quellcode und Dokumentation und erstellt in Git auf Wunsch Tag und Commit.
+(Der Schalter `-n` führt einen dry-run durch.)
 
-Bump2version ist eine aktuellere Version von bumpversion. Es verändert die Versionen in den Dateien und erstellt in git auf Wunsch Tag und commit. (Der Schalter -n führt einen dry-run durch.)
-
-Siehe auch: [Versioning using bumpversion](https://medium.com/@williamhayes/versioning-using-bumpversion-4d13c914e9b8)
+Siehe auch: [Versioning using bumpversion](https://medium.com/@williamhayes/versioning-using-bumpversion-4d13c914e9b8).
 
 Beispielaufruf:
+
 ```sh
 bump2version --tag --commit minor
 git push origin master --tags
