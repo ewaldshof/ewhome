@@ -3,9 +3,26 @@ set -e
 
 cd firmware
 
-#set -x
+PORT="${1:-$EWHOME_PORT}"
 
-PORT=${1:-"/dev/tty.SLAB_USBtoUART"}
+if [ "$PORT" = '' ]; then
+	noport=1
+	usageto=2
+fi
+case "$PORT" in
+	''|-h|--help|/?)
+		cat >&"${usageto:-1}" <<-END
+			usage: ./sync-to-board.sh [PORT]
+
+			Replace PORT with the serial port path or name where the board can be found.
+			It defaults to the value of the EWHOME_PORT environment variable, if set.
+
+			This upload all files in firmware/ to the board.
+END
+		exit "${noport:-0}"
+		;;
+esac
+
 
 QUIET="--quiet"
 
