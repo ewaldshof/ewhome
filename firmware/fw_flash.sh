@@ -1,8 +1,27 @@
 #!/bin/sh
+set -e
 
-PORT=${1:-"/dev/tty.SLAB_USBtoUART"}
-export BIN_FILE="../bins/esp32-20190529-v1.11.bin"
+PORT="$1"
+BIN_FILE="../bins/esp32-20190529-v1.11.bin"
 
-esptool.py --chip esp32 --port $PORT erase_flash
+if [ "$PORT" = '' ]; then
+	noport=1
+	usageto=2
+fi
+case "$PORT" in
+	''|-h|--help|/?)
+		cat >&"${usageto:-1}" <<-END
+			usage: ./fw_flash.sh PORT
 
-esptool.py --chip esp32 --port $PORT --baud 460800 write_flash -z 0x1000 $BIN_FILE
+			Replace PORT with the serial port path or name where the board can be found.
+
+			This will flash $BIN_FILE to the board.
+END
+		exit "${noport:-0}"
+		;;
+esac
+
+
+esptool.py --chip esp32 --port "$PORT" erase_flash
+
+esptool.py --chip esp32 --port "$PORT" --baud 460800 write_flash -z 0x1000 "$BIN_FILE"

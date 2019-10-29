@@ -36,17 +36,7 @@ In der letzten Zeile finden sich Statusinformationen:
 Ein Board, das noch kein aktuelles MicroPython aufgespielt bekommen hat, lässt sich folgendermaßen flashen:
 
 1. `esptool.py` besorgen via `pip install esptool`. **Nicht** das `esptool` aus den Debian-/Ubuntu-Paketen benutzen.
-2. Firmware-Image von http://micropython.org/download herunterladen. Der Ewaldshof benutzt ESP32-Boards.
-3. Firmware flashen mittels `esptool.py -p /dev/ttyS0 write_flash 0x1000 esp32-20190529-v1.11.bin`. Dabei natürlich `ttyS0` mit dem korrekten Port ersetzen und auch den Namen der Firmware-Datei wenn nötig anpassen.
-
-fw_flash.sh [<Serial Port>]
-Default für Serial Port: "/dev/tty.SLAB_USBtoUART"
-
-Alternativ:
-
-```sh
-./firmware/fw_flash.sh
-```
+2. Das Script `fw_flash.sh` mit dem Port, über den das Board erreichbar ist, ausführen, also z.B. `./fw_flash.sh /dev/tty.SLAB_USBtoUART`.
 
 ## Dateien auf ESP32 übertragen
 Der Source Code liegt im Verzeichnis "firmware". Übertragung z.B. mit Hilfe des Scripts firmware/sync-to-board.sh
