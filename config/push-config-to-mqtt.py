@@ -11,7 +11,7 @@ except ImportError:
 
 config_file = "ewhome.yaml"
 broker_address = "10.0.0.88"
-topic = "ewh/config"
+topic = "ewhome/config"
 published = False
 
 

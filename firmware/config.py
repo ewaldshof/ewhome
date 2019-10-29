@@ -8,7 +8,7 @@ class Config:
         self.mine = None
         self.version = "0.3.0"
         self.listeners = []
-        mqtt.subscribe("ewh/config", self.on_mqtt)
+        mqtt.subscribe("ewhome/config", self.on_mqtt)
 
     def on_mqtt(self, topic, msg):
         try:
