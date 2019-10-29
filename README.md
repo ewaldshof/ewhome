@@ -29,6 +29,24 @@ In der letzten Zeile finden sich Statusinformationen:
   * `Unknown` wenn es für das Statusflag kein passendes `if` im Code gibt.
 * `<3` ist ein jede Sekunde rhythmisch blinkender Herzschlag, der zeigt, ob das Board gecrasht ist.
 
+## MQTT-Hierarchie
+
+Hier ist beispielhaft aufgeführt, unter welchen MQTT-Pfaden welche Informationen zu finden sind.
+Die einzelnen Ebenen werden durch Slash (`/`) getrennt.
+
+* **`ewhome`:** Der Namensraum, unter dem sich alle von diesem Projekt verarbeiteten Daten finden.
+  * **`config`:** Die Konfigurationsdaten aus [`ewhome.yaml`](config/ewhome.yaml) in JSON-Form, wie sie von [`push-config-to-mqtt.py`](config/push-config-to-mqtt.py) abgelegt werden.
+  * **`ds18x20`:** Sensorwerte der DS18x20-Temperatursensoren.
+    * **`28190f43980e0005`:** Temperaturwert des Sensors mit dieser Hardware-ID, im JSON-Format.
+  * **`rooms`:** Die einzelnen Räume, benannt nach ihren „IDs“.
+    * **`A2.3`:** Gebäudeteil A, 2. Stock, Raum 3
+      * **`meta`:** JSON-kodierte Informationen über den Raum (menschenlesbarer Name, Koordinaten, etc.)
+      * **`actuators`:**
+      * **`controllers`:**
+      * **`sensors`:**
+        * **`luft`, `vorlauf`, `ruecklauf1`, `ruecklauf2`, …:** Daten von dem Raum zugeordneten Sensoren, z.B. Kopie der JSON-Struktur aus `ds18x20`.
+
+
 ## Port-Konfiguration
 
 Ein mit dem Computer verbundenes Board ist über einen seriellen Port erreichbar, der sich aber von Rechner zu Rechner unterscheidet, z.B. `/dev/tty.SLAB_USBtoUART` unter Linux, `/dev/ttyS3` unter WSL und `COM3` unter Windows.

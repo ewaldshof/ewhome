@@ -5,16 +5,48 @@ esps:
     name: Test Tim o. Pins
   b4:e6:2d:8f:bc:59:
     te_antriebe:
+      4_2: A1.1/heizkreis1
       A1.1:
         - 4_2
         - 4_3
         - 4_4
-    ds18b20: 2_1
+    ds18x20: 2_1 # Pin for all DS18x20 sensors
     fbh_regler:
       - A1.1
+  cc:50:e3:b6:87:dc:
+    name: Testboard Alpha
+    modules:
+      ds18x20:
+        pin: 2_1
+      te_actuator:
+        pins:
+          4_1: A2.3/Dusche
+          4_3: A2.3/restliches Bad
+      pin_out:
+        pins:
+          4_5: A3.4/Relais Lüfter
+      threshold:
+        - sensor: A3.4/feuchte
+          actor: A3.4/Relais Lüfter
+          threshold: '>50%'
+      fbh_regler:
+          lufttemperatur: A1.1/temperature
+        connect:
+          - sensor: A2.3/Rücklauf Dusche
+            actuator: A2.3/Dusche
+          - sensor: Wetterstation auf dem Dach
+            actuator: A2.3/restliches Bad
+        connect: auto # oder leer lassen
 
-# Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
-ds18b20:
+
+rooms:
+  T2.3:
+    name: Test Chamber
+    description: Not a real room, just used for testing purposes. This is where the science happens.
+
+# Mapping der DS18x20-Temperatursensoren auf sprechende Namen.
+ds18x20:
+  2805084398ff002f: Test Chamber/
   1234589abc: A1.1/luft
   1234589abc: A1.1/vorlauf
   1234589abc: A1.1/ruecklauf1
