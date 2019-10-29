@@ -2,7 +2,7 @@
 set -e
 
 PORT="$1"
-BIN_FILE="../bins/esp32-20190529-v1.11.bin"
+BIN_FILE="bins/esp32-20190529-v1.11.bin"
 
 if [ "$PORT" = '' ]; then
 	noport=1
@@ -11,7 +11,7 @@ fi
 case "$PORT" in
 	''|-h|--help|/?)
 		cat >&"${usageto:-1}" <<-END
-			usage: ./fw_flash.sh PORT
+			usage: ./flash-firmware.sh PORT
 
 			Replace PORT with the serial port path or name where the board can be found.
 

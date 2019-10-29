@@ -36,21 +36,24 @@ In der letzten Zeile finden sich Statusinformationen:
 Ein Board, das noch kein aktuelles MicroPython aufgespielt bekommen hat, lässt sich folgendermaßen flashen:
 
 1. `esptool.py` besorgen via `pip install esptool`. **Nicht** das `esptool` aus den Debian-/Ubuntu-Paketen benutzen.
-2. Das Script `fw_flash.sh` mit dem Port, über den das Board erreichbar ist, ausführen, also z.B. `./fw_flash.sh /dev/tty.SLAB_USBtoUART`.
+2. Das Script `flash-firmware.sh` mit dem Port, über den das Board erreichbar ist, ausführen, also z.B. `./flash-firmware.sh /dev/tty.SLAB_USBtoUART`.
 
 ## Dateien auf ESP32 übertragen
-Der Source Code liegt im Verzeichnis "firmware". Übertragung z.B. mit Hilfe des Scripts firmware/sync-to-board.sh
-rshell muss für das Script installiert sein.
+
+Der Quellcode liegt im Verzeichnis `firmware`.
+Er lässt sich mit den für MicroPython üblichen Wegen übertragen.
+
+Alternativ steht das Script `sync-to-board.sh` zur Verfügung, das alle Firmware-Files mit dem Board abgleicht und die geänderten hochlädt.
+Das Script benötigt [rshell](https://github.com/dhylands/rshell) (`pip install --user rshell`).
 
 sync-to-board.sh [<Serial Port>]
 Default für Serial Port: "/dev/tty.SLAB_USBtoUART"
 
 Beispielaufruf:
+
 ```sh
-cd firmware
 ./sync-to-board.sh COM4
 ```
-
 
 ## Config schreiben
 

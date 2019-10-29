@@ -1,4 +1,7 @@
 #!/bin/sh
+set -e
+
+cd firmware
 
 #set -x
 
@@ -28,4 +31,3 @@ rshell $QUIET --port $PORT cp "*.py" "/pyboard/" && {
     echo "rshell failed!"
     exit 1
 }
-
