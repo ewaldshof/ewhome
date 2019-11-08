@@ -14,13 +14,35 @@ cachefile = cachedir + "/config.json"
 class Config:
 
     def __init__(self, network, mqtt):
+        self.parts_initialized = False
         self.mac = network.mac
         self.data = {}
         self.mine = None
         self.version = "0.3.0"
         self.listeners = []
         self.read_cache()
+        self.init_parts()
         mqtt.subscribe(mqtt.PREFIX + "/config", self.on_mqtt)
+
+    def init_parts(self):
+        if self.parts_initialized:
+            return
+        self.parts_initialized = True
+        if not (type(self.mine) is dict and "parts" in self.mine):
+            return
+        for partname, partconfig in self.mine["parts"].items():
+            modname = "parts." + partname
+            classname = "".join(word[0].upper() + word[1:] for word in partname.split("_"))
+            print("Initializing part: {0} (import {1} from {2})".format(partname, classname, modname))
+            instance = None
+            try:
+                imported = __import__("parts." + partname, globals(), locals(), [classname])
+                try:
+                    instance = getattr(imported, classname)(partconfig)
+                except Exception as e:
+                    print("Instantiation failed: {0}: {1}".format(type(e).__name__, str(e)))
+            except Exception as e:
+                print("Import failed: {0}: {1}".format(type(e).__name__, str(e)))
 
     def read_cache(self):
         data = None
