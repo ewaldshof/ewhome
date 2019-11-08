@@ -12,6 +12,8 @@ esps:
     ds18b20: 2_1
     fbh_regler:
       - A1.1
+  cc:50:e3:b6:87:dc:
+    name: Testboard Alpha
 
 # Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
 ds18b20:

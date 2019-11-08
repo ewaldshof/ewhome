@@ -1,4 +1,9 @@
+import errno
 import ujson
+from uos import mkdir
+
+cachedir = "/cache"
+cachefile = cachedir + "/config.json"
 
 class Config:
 
@@ -8,16 +13,43 @@ class Config:
         self.mine = None
         self.version = "0.3.0"
         self.listeners = []
+        self.read_cache()
         mqtt.subscribe("ewhome/config", self.on_mqtt)
 
-    def on_mqtt(self, topic, msg):
+    def read_cache(self):
+        data = None
         try:
-            self.data = ujson.loads(msg)
+            with open(cachefile, "r") as infile:
+                data = ujson.load(infile)
         except:
-            print("JSON config decode error: " + msg)
-        self.mine = self.data.get("esps", {}).get(self.mac, None)
+            print("Could not read from config cache.")
+        if data is not None:
+            self.set_data(data)
+
+    def write_cache(self, data):
+        try:
+            mkdir(cachedir)
+        except OSError as e:
+            if e.args[0] != errno.EEXIST: # MicroPython OSError objects don't have .errno
+                raise
+        with open(cachefile, "w") as outfile:
+            ujson.dump(data, outfile)
+        print("Written config cache.")
+
+    def set_data(self, data):
+        self.data = data
+        self.mine = data.get("esps", {}).get(self.mac, None)
         for listener in self.listeners:
             listener(self)
+
+    def on_mqtt(self, topic, msg):
+        data = None
+        try:
+            data = ujson.loads(msg)
+        except:
+            print("JSON config decode error: " + msg)
+        self.set_data(data)
+        self.write_cache(data)
 
     def on_update(self, listener):
         self.listeners.append(listener)
