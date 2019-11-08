@@ -87,9 +87,17 @@ class MQTT(Task):
         return sub_id
 
     def publish(self, topic, message, retain=False):
-        print("--> MQTT {0}{1}: {2}".format(topic, " (retain)" if retain else "", message))
-        # TODO: error handling if not connected
-        self.client.publish(topic, message, retain)
+        print("-{0}> MQTT {1}{2}: {3}".format(
+            "-" if self.connected else " ", topic, " (retain)" if retain else "", message
+        ))
+        if self.connected:
+            try:
+                self.client.publish(topic, message, retain)
+                return
+            except:
+                self.set_connected(False)
+        # At this point, the message was not sent and we are probably disconnected. Deliver locally.
+        self.callback(topic, message)
 
     def update(self, scheduler):
         if not self.connected:
