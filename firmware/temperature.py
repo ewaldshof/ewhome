@@ -26,7 +26,7 @@ class Temperature(Task):
                     if self.mqtt:
                         self.mqtt.publish(
                             "ewhome/ds18x20/" + sensor.hex_address,
-                            str(sensor),
+                            sensor.get_data(),
                             retain=True,
                         )
                 except:
@@ -50,9 +50,12 @@ class Sensor:
         self.pretty_address = hexlify(self.address, ":").decode("utf-8")
         self.temperature = None
 
-    def __str__(self):
-        return ujson.dumps({
+    def get_data(self):
+        return {
             "id": self.hex_address,
             "address": self.pretty_address,
             "temperature_c": self.temperature,
-        })
+        }
+
+    def __str__(self):
+        return ujson.dumps(self.get_data())

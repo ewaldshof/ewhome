@@ -1,4 +1,5 @@
 from task import Task
+import ujson
 from umqtt.simple import MQTTClient
 import ure
 
@@ -22,7 +23,14 @@ class MQTT(Task):
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
 
-    def callback(self, topic, msg):
+    def callback(self, topic, msg, unjson=True):
+        if unjson:
+            try:
+                msg = ujson.loads(msg)
+            except:
+                # Don't pass non-JSON payloads around.
+                print("<!- MQTT {0} non-JSON payload rejected: {1}".format(topic, msg))
+                return
         print("<-- MQTT {0}: {1}".format(topic, msg))
         for subscription in self.subscriptions:
             if subscription["re"].match(topic):
@@ -87,12 +95,13 @@ class MQTT(Task):
                 self.set_connected(False)
         return sub_id
 
-    def publish(self, topic, message, retain=False):
+    def publish(self, topic, data, retain=False):
+        message = ujson.dumps(data)
         print("-{0}> MQTT {1}{2}: {3}".format(
             "-" if self.connected else " ", topic, " (retain)" if retain else "", message
         ))
         if retain:
-            self.cache[topic] = message
+            self.cache[topic] = data
         if self.connected:
             try:
                 self.client.publish(topic, message, retain)
@@ -100,7 +109,7 @@ class MQTT(Task):
             except:
                 self.set_connected(False)
         # At this point, the message was not sent and we are probably disconnected. Deliver locally.
-        self.callback(topic, message)
+        self.callback(topic, data, unjson=False) # no need to convert JSON back and forth
 
     def get_cached(self, topic, default=None):
         return self.cache[topic] if topic in self.cache else default

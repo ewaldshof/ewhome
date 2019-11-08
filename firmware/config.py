@@ -42,12 +42,7 @@ class Config:
         for listener in self.listeners:
             listener(self)
 
-    def on_mqtt(self, topic, msg):
-        data = None
-        try:
-            data = ujson.loads(msg)
-        except:
-            print("JSON config decode error: " + msg)
+    def on_mqtt(self, topic, data):
         self.set_data(data)
         self.write_cache(data)
 
