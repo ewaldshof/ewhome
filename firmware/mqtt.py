@@ -58,13 +58,22 @@ class MQTT(Task):
         if regex[-1] != "$":
             regex = regex + "$"
         regex_obj = ure.compile(regex)
-        subscription = {
+        new_subscription = {
             "topic": topic,
             "re": regex_obj,
             "callback": callback,
         }
-        self.subscriptions.append(subscription)
+        for subscription in self.subscriptions:
+            for k in ("topic", "callback"):
+                if new_subscription[k] != subscription[k]:
+                    break
+                print("Duplicate subscription on {0} for same callback, returning old id {1}".format(
+                    subscription["topic"], subscription["id"]
+                ))
+                return subscription["id"]
+        self.subscriptions.append(new_subscription)
         sub_id = len(self.subscriptions) - 1
+        new_subscription["id"] = sub_id
         print("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
         try:
             self.client.subscribe(topic)
