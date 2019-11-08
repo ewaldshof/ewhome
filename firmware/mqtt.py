@@ -22,6 +22,7 @@ class MQTT(Task):
         self.client.set_callback(self.callback)
 
     def callback(self, topic, msg):
+        print("<-- MQTT {0}: {1}".format(topic, msg))
         for subscription in self.subscriptions:
             if subscription["re"].match(topic):
                 try:
@@ -38,15 +39,17 @@ class MQTT(Task):
                 self.on_disconnect()
 
     def on_connect(self):
-        print("MQTT connected")
+        print("o-o MQTT connected")
         for subscription in self.subscriptions:
+            topic = subscription["topic"]
+            print("~~~ MQTT subscribe on {0}".format(topic))
             try:
-                self.client.subscribe(subscription["topic"])
+                self.client.subscribe(topic)
             except:
                 self.set_connected(False)
 
     def on_disconnect(self):
-        print("MQTT disconnected")
+        print("-x- MQTT disconnected")
 
     def subscribe(self, topic, callback):
         # Build a regex that converts MQTT wildcards to regexes for subscription filtering.
@@ -75,13 +78,16 @@ class MQTT(Task):
         sub_id = len(self.subscriptions) - 1
         new_subscription["id"] = sub_id
         print("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
-        try:
-            self.client.subscribe(topic)
-        except:
-            self.set_connected(False)
+        if self.connected:
+            try:
+                print("~~~ MQTT subscribe on {0}".format(topic))
+                self.client.subscribe(topic)
+            except:
+                self.set_connected(False)
         return sub_id
 
     def publish(self, topic, message, retain=False):
+        print("--> MQTT {0}{1}: {2}".format(topic, " (retain)" if retain else "", message))
         # TODO: error handling if not connected
         self.client.publish(topic, message, retain)
 
