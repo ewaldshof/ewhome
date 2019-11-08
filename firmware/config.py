@@ -1,6 +1,12 @@
 import errno
+import machine
 import ujson
 from uos import mkdir
+try: # Some boards have a sync() call for filesystem sync, others don't.
+    from uos import sync
+except:
+    def sync():
+        pass
 
 cachedir = "/cache"
 cachefile = cachedir + "/config.json"
@@ -43,8 +49,13 @@ class Config:
             listener(self)
 
     def on_mqtt(self, topic, data):
+        mine_before = self.mine
         self.set_data(data)
         self.write_cache(data)
+        if self.mine != mine_before:
+            # My config has changed. Reboot.
+            sync()
+            machine.reset()
 
     def on_update(self, listener):
         self.listeners.append(listener)
