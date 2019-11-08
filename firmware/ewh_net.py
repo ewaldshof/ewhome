@@ -1,14 +1,15 @@
 import network as net
 from task import Task
 from ubinascii import hexlify
+import ujson
 
 class Network(Task):
 
-    ssid     = "Wohnis"
-    password = "y0ur_W1F1_p@sswORD"
-
     def __init__(self):
         super().__init__()
+        with open("/wlan.json", "r") as wlan_config:
+            self.config = ujson.load(wlan_config)
+        print("WLAN config:", self.config)
         self.wlan = net.WLAN(net.STA_IF)
         self.wlan.active(True)
         self.status = None
@@ -22,7 +23,7 @@ class Network(Task):
         if status == self.status: # no change, do nothing
             return
         if status == net.STAT_IDLE or status == net.STAT_NO_AP_FOUND:
-            self.wlan.connect(Network.ssid, Network.password)
+            self.wlan.connect(self.config["ssid"], self.config["password"])
             msg = "Starting"
         elif status == net.STAT_CONNECTING:
             msg = "Trying.."

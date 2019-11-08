@@ -68,6 +68,11 @@ Das Script benötigt [rshell](https://github.com/dhylands/rshell) (`pip install 
 
 Es akzeptiert den zu verwendenden Port [wie oben beschrieben](#port-konfiguration) per Umgebungsvariable oder Parameter.
 
+## WLAN-Konfiguration für Boards
+
+Um die WLAN-Konfigurationsdaten nicht im Repository zu haben, erwarten die Boards eine Datei `wlan.json` im Hauptverzeichnis, in der `ssid` und `password` gesetzt werden.
+Ein Beispiel findet sich unter [`wlan.json.example`](firmware/wlan.json.example).
+
 ## Config schreiben
 
 Unter `config` gibt es das Script `push-config-to-mqtt.py`, das die Konfiguration aus `ewhome.yaml` in JSON konvertiert und in MQTT ablegt.

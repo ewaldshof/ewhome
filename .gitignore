@@ -1,2 +1,4 @@
 /.vscode/
 .venv/**
+
+/firmware/wlan.json
