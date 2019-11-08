@@ -18,6 +18,7 @@ class MQTT(Task):
         super().__init__()
         self.connected = False
         self.subscriptions = []
+        self.cache = {}
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
 
@@ -90,6 +91,8 @@ class MQTT(Task):
         print("-{0}> MQTT {1}{2}: {3}".format(
             "-" if self.connected else " ", topic, " (retain)" if retain else "", message
         ))
+        if retain:
+            self.cache[topic] = message
         if self.connected:
             try:
                 self.client.publish(topic, message, retain)
@@ -98,6 +101,9 @@ class MQTT(Task):
                 self.set_connected(False)
         # At this point, the message was not sent and we are probably disconnected. Deliver locally.
         self.callback(topic, message)
+
+    def get_cached(self, topic, default=None):
+        return self.cache[topic] if topic in self.cache else default
 
     def update(self, scheduler):
         if not self.connected:
