@@ -7,6 +7,8 @@ class MQTT(Task):
 
     SERVER = "mqtt.ewh"
 
+    PREFIX = "ewhome"
+
     MQTT_TO_REGEX = {
         "^\\+/": "[^/]+/",
         "/\\+$": "/[^/]+",

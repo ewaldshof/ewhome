@@ -14,7 +14,7 @@ class Config:
         self.version = "0.3.0"
         self.listeners = []
         self.read_cache()
-        mqtt.subscribe("ewhome/config", self.on_mqtt)
+        mqtt.subscribe(mqtt.PREFIX + "/config", self.on_mqtt)
 
     def read_cache(self):
         data = None
