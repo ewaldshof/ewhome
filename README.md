@@ -84,9 +84,9 @@ cd config
 pipenv run python push-config-to-mqtt.py
 ```
 
-# Bump2version
+## bump2version
 
-Bump2version ist eine aktuellere Version von bumpversion.
+bump2version ist eine aktuellere Version von bumpversion.
 Es verändert die Versionsnummern in den Quellcode und Dokumentation und erstellt in Git auf Wunsch Tag und Commit.
 (Der Schalter `-n` führt einen dry-run durch.)
 
