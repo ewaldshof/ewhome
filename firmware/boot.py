@@ -7,27 +7,20 @@ from name import Name
 from mqtt import MQTT
 from task import Scheduler
 
-board = Board()
+network = Network()
+mqtt = MQTT(network)
+
+board = Board(network, mqtt)
 board.init()
 
 heartbeat = Heartbeat(board.display)
-
-network = Network()
-if board.display:
-    board.display.set_network(network)
-
-mqtt = MQTT(network)
-if board.display:
-    board.display.set_mqtt(mqtt)
-board.temperature.mqtt = mqtt
 
 config = Config(network, mqtt)
 
 name = Name(config, board.display)
 
 scheduler = Scheduler()
-if board.display:
-    scheduler.register(board.display)
+scheduler.register(board.display)
 scheduler.register(board.temperature)
 scheduler.register(heartbeat)
 scheduler.register(network)

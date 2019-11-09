@@ -11,6 +11,5 @@ class Heartbeat(Task):
 
     def update(self, scheduler):
         self.rhythm_index = (self.rhythm_index + 1) % len(self.rhythm)
-        if self.display:
-            self.display.show_heartbeat(self.rhythm_index % 2 == 0)
+        self.display.show_heartbeat(self.rhythm_index % 2 == 0)
         self.countdown = self.interval = self.rhythm[self.rhythm_index]

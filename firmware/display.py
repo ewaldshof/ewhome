@@ -2,26 +2,18 @@ from task import Task
 
 class Display(Task):
 
-    def __init__(self, driver):
+    def __init__(self, driver, network, mqtt):
         super().__init__()
         self.driver = driver
-        self.mac = ["??"] * 6
         self.lines = [""] * 6
-        self.network = None
-        self.mqtt = None
+        self.network = network
+        self.mqtt = mqtt
+        self.mac = network.mac.split(":")
         self.blip = True
         self.mqtt_status = None
         self.wlan_status = None
         self.interval = 400
         self.clear()
-
-    def set_network(self, network):
-        self.network = network
-        self.mac = network.mac.split(":")
-        self.redraw()
-
-    def set_mqtt(self, mqtt):
-        self.mqtt = mqtt
 
     def text(self, text, line):
         if line > 5:
@@ -49,10 +41,9 @@ class Display(Task):
             self.driver.text(self.mac[byte], 22 * byte + 1, 49)
 
         # Status bar.
-        if self.mqtt is not None and self.mqtt.connected:
+        if self.mqtt.connected:
             self.driver.text("M", 0, 57)
-        if self.network is not None:
-            self.driver.text("WL " + self.network.wlan_msg, 16, 57)
+        self.driver.text("WL " + self.network.wlan_msg, 16, 57)
         self.driver.text("<3", 113, 57, int(self.blip))
 
         # Show result and update things.

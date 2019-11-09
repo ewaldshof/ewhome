@@ -7,12 +7,12 @@ import ujson
 
 class Temperature(Task):
 
-    def __init__(self, pin, interval_s=10):
+    def __init__(self, pin, mqtt, interval_s=10):
         super().__init__()
         self.pin = pin
         self.interval_s = max(interval_s, 2) # no faster than 2s
         self.converting = False
-        self.mqtt = None
+        self.mqtt = mqtt
         self.ds = DS18X20(OneWire(pin))
         self.sensors = list(map(Sensor, self.ds.scan()))
         self.interval = self.countdown = 1000 * self.interval_s
@@ -23,12 +23,11 @@ class Temperature(Task):
             for sensor in self.sensors:
                 try:
                     sensor.temperature = self.ds.read_temp(sensor.address)
-                    if self.mqtt:
-                        self.mqtt.publish(
-                            self.mqtt.PREFIX + "/ds18x20/" + sensor.hex_address,
-                            sensor.get_data(),
-                            retain=True,
-                        )
+                    self.mqtt.publish(
+                        self.mqtt.PREFIX + "/ds18x20/" + sensor.hex_address,
+                        sensor.get_data(),
+                        retain=True,
+                    )
                 except:
                     # Ignore things like CRC errors.
                     pass
