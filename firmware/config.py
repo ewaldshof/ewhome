@@ -18,7 +18,7 @@ class Config:
         self.mac = network.mac
         self.data = {}
         self.mine = None
-        self.version = "0.3.0"
+        self.version = "0.4.0"
         self.listeners = []
         self.read_cache()
         self.init_parts()
