@@ -1,5 +1,4 @@
 from .base import Board as BaseBoard
-from heating import Actuator
 from machine import Pin
 
 class Board(BaseBoard):
