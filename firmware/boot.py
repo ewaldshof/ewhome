@@ -15,7 +15,7 @@ board.init()
 
 heartbeat = Heartbeat(board.display)
 
-config = Config(network, mqtt)
+config = Config(board, network, mqtt)
 
 name = Name(config, board.display)
 

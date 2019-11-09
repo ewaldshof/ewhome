@@ -15,8 +15,9 @@ cachefile = cachedir + "/config.json"
 
 class Config:
 
-    def __init__(self, network, mqtt):
+    def __init__(self, board, network, mqtt):
         self.mqtt = mqtt
+        self.board = board
         self.parts_initialized = False
         self.mac = network.mac
         self.data = {}
@@ -33,7 +34,7 @@ class Config:
         self.parts_initialized = True
         if not (type(self.mine) is dict and "parts" in self.mine):
             return
-        services = Services(self.mqtt)
+        services = Services(self.board, self.mqtt)
         for partname, partconfig in self.mine["parts"].items():
             modname = "parts." + partname
             classname = "".join(word[0].upper() + word[1:] for word in partname.split("_"))

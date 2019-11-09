@@ -10,5 +10,6 @@ class Part:
 
 class Services:
 
-    def __init__(self, mqtt):
+    def __init__(self, board, mqtt):
+        self.board = board
         self.mqtt = mqtt
