@@ -1,4 +1,6 @@
-class ConfigDumper:
+from parts import Part
 
-    def __init__(self, config):
-        print("This is ConfigDumper, and my config is:", config)
+class ConfigDumper(Part):
+
+    def boot(self):
+        print("ConfigDumper booting, my config is:", self.config)

@@ -1,7 +1,9 @@
 import errno
 import machine
+from parts import Services
 import ujson
 from uos import mkdir
+
 try: # Some boards have a sync() call for filesystem sync, others don't.
     from uos import sync
 except:
@@ -14,6 +16,7 @@ cachefile = cachedir + "/config.json"
 class Config:
 
     def __init__(self, network, mqtt):
+        self.mqtt = mqtt
         self.parts_initialized = False
         self.mac = network.mac
         self.data = {}
@@ -30,6 +33,7 @@ class Config:
         self.parts_initialized = True
         if not (type(self.mine) is dict and "parts" in self.mine):
             return
+        services = Services(self.mqtt)
         for partname, partconfig in self.mine["parts"].items():
             modname = "parts." + partname
             classname = "".join(word[0].upper() + word[1:] for word in partname.split("_"))
@@ -38,7 +42,8 @@ class Config:
             try:
                 imported = __import__("parts." + partname, globals(), locals(), [classname])
                 try:
-                    instance = getattr(imported, classname)(partconfig)
+                    instance = getattr(imported, classname)(partconfig, services)
+                    instance.boot()
                 except Exception as e:
                     print("Instantiation failed: {0}: {1}".format(type(e).__name__, str(e)))
             except Exception as e:
