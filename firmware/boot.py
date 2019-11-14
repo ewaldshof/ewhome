@@ -15,11 +15,12 @@ board.init()
 
 heartbeat = Heartbeat(board.display)
 
-config = Config(board, network, mqtt)
+scheduler = Scheduler()
+
+config = Config(board, network, mqtt, scheduler)
 
 name = Name(config, board.display)
 
-scheduler = Scheduler()
 scheduler.register(board.display)
 scheduler.register(board.temperature)
 scheduler.register(heartbeat)
