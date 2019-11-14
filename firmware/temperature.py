@@ -9,6 +9,7 @@ class Temperature(Task):
 
     def __init__(self, pin, mqtt, interval_s=10):
         super().__init__()
+        self.names = {}
         self.pin = pin
         self.interval_s = max(interval_s, 2) # no faster than 2s
         self.converting = False
@@ -18,17 +19,27 @@ class Temperature(Task):
         print("Found {0} DS18x20 sensors.".format(len(self.sensors)))
         self.interval = self.countdown = 1000 * self.interval_s
 
+    def _on_config_update(self, config):
+        self.names = config.data.get("ds18x20", {})
+
     def update(self, scheduler):
         if self.converting:
             # We've waited enough for the sensor(s). Read the temperatures.
             for sensor in self.sensors:
                 try:
                     sensor.temperature = self.ds.read_temp(sensor.address)
+                    sensor_data = sensor.get_data()
                     self.mqtt.publish(
                         "ds18x20/" + sensor.hex_address,
                         sensor.get_data(),
                         retain=True,
                     )
+                    if sensor_data["id"] in self.names:
+                        self.mqtt.publish(
+                            self.names[sensor_data["id"]],
+                            sensor_data["temperature_c"],
+                            retain=True
+                        )
                 except:
                     # Ignore things like CRC errors.
                     pass

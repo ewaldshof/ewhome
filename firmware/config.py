@@ -24,7 +24,7 @@ class Config:
         self.data = {}
         self.mine = None
         self.version = "0.4.0"
-        self.listeners = []
+        self.listeners = [self.board.temperature._on_config_update] # TODO: Hack until Temperature becomes a Part.
         self.read_cache()
         self.init_parts()
         mqtt.subscribe("config", self.on_mqtt)
