@@ -12,7 +12,7 @@ class Assign(Part):
         for topic, expression in self.config.items():
             self.handlers[topic] = AssignHandler(self.mqtt, topic, expression)
 
-class OutputPinHandler:
+class AssignHandler:
 
     def __init__(self, mqtt, topic, expression):
         self.topic = topic
