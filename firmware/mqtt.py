@@ -26,6 +26,7 @@ class MQTT(Task):
         self.client.set_callback(self.callback)
 
     def callback(self, topic, msg, unjson=True):
+        topic = topic.decode("utf-8")
         if unjson:
             try:
                 msg = ujson.loads(msg)
@@ -34,6 +35,7 @@ class MQTT(Task):
                 print("<!- MQTT {0} non-JSON payload rejected: {1}".format(topic, msg))
                 return
         print("<-- MQTT {0}: {1}".format(topic, msg))
+        self.cache[topic] = msg
         for subscription in self.subscriptions:
             if subscription["re"].match(topic):
                 try:
