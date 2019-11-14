@@ -99,6 +99,11 @@ class MQTT(Task):
                 self.set_connected(False)
         return sub_id
 
+    def subscribe_expression(self, expression, callback):
+        expr = Expression(self, expression)
+        expr.subscribe(callback)
+        return expr
+
     def publish(self, topic, data, retain=False):
         message = ujson.dumps(data)
         print("-{0}> MQTT {1}{2}: {3}".format(
@@ -118,6 +123,9 @@ class MQTT(Task):
     def get_cached(self, topic, default=None):
         return self.cache[topic] if topic in self.cache else default
 
+    def get_cached_or_raise(self, topic, default=None):
+        return self.cache[topic] if topic in self.cache else default
+
     def update(self, scheduler):
         if not self.connected:
             try:
@@ -130,3 +138,52 @@ class MQTT(Task):
                 self.client.check_msg()
             except:
                 self.set_connected(False)
+
+
+class Expression:
+
+    def __init__(self, mqtt, expression):
+        self.mqtt = mqtt
+        self.topics = []
+        self.expression = expression
+        self.python = expression
+        self.expr_globals = {
+            "mqtt_get_value": mqtt.get_cached_or_raise,
+        }
+        self._analyze(expression)
+        self.topics = list(set(self.topics))  # remove duplicates
+        print("Expression `{0}` becomes `{1}`, has topics: {2}".format(expression, self.python, self.topics))
+
+    def _analyze(self, expression):
+        # MicroPython doesn't support \w in character classes, hence we write them out.
+        topic_re = ure.compile(r'[A-Za-z0-9_][A-Za-z0-9_./]+/[A-Za-z0-9_.]*[A-Za-z0-9_]')
+        # There's also no find_all, and on the ESP32 no match.end(), therefore we use sub() to collect topics.
+        self.python = topic_re.sub(self._replace_in_expr, expression)
+
+    def _on_mqtt(self, topic, value):
+        # Try evaluating the expression. If there are errors, don't notify our observer.
+        try:
+            value = self.evaluate()
+            try:
+                self.callback(self, value)
+            except Exception as e:
+                print("Callback for `{0}` failed: {1}: {2}".format(
+                    self.expression, type(e).__name__, str(e)
+                ))
+        except Exception as e:
+            print("Evaluating `{0}` failed: {1}: {2}".format(
+                self.expression, type(e).__name__, str(e)
+            ))
+
+    def _replace_in_expr(self, match):
+        topic = match.group(0)
+        self.topics.append(topic)
+        return 'mqtt_get_value("{0}")'.format(topic)
+
+    def evaluate(self):
+        return eval(self.python, self.expr_globals)
+
+    def subscribe(self, callback):
+        self.callback = callback
+        for topic in self.topics:
+            self.mqtt.subscribe(topic, self._on_mqtt)
