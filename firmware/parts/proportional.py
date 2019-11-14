@@ -15,6 +15,7 @@ class Proportional(Part):
         self.handlers = {}
         for topic, config in self.config.items():
             self.handlers[topic] = ProportionalHandler(self.mqtt, topic, **config)
+            self.scheduler.register(self.handlers[topic])
 
 class ProportionalHandler(Task):
 
@@ -24,7 +25,7 @@ class ProportionalHandler(Task):
         self.sensor = mqtt.subscribe_expression(sensor, self._noop)
         self.midpoint = mqtt.subscribe_expression(midpoint, self._noop)
         self.spread = mqtt.subscribe_expression(spread, self._noop)
-        self.timeout = self.interval = 1000 * interval
+        self.countdown = self.interval = 1000 * interval
 
     def update(self, scheduler):
         result = 0.0  # Default if anything goes wrong.
