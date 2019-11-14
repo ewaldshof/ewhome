@@ -163,6 +163,8 @@ class Expression:
         self.python = expression
         self.expr_globals = {
             "dew"  : self._dewpoint,
+            "min"  : min,
+            "max"  : max,
             "sqrt" : math.sqrt,
             "exp"  : math.exp,
             "abs"  : math.fabs,
@@ -177,7 +179,6 @@ class Expression:
             "atan" : math.atan,
             "atan2": math.atan2,
             "cos"  : math.cos,
-            "hypot": math.hypot,
             "sin"  : math.sin,
             "tan"  : math.tan,
             "trunc": math.trunc,
@@ -185,7 +186,6 @@ class Expression:
             "radians" : math.radians,
             "randint" : random.randint,
             "uniform" : random.uniform,
-            "gauss"   : random.gauss,
             "time"    : utime.time,  #only available in micropython
             "mqtt_get_value": mqtt.get_cached_or_raise,
         }
