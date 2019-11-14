@@ -19,6 +19,10 @@ class OutputPinHandler:
     def __init__(self, mqtt, pin, expression):
         self.pin = pin
         self.expression = mqtt.subscribe_expression(expression, self._on_change)
+        try:
+            self.pin(bool(self.expression.evaluate()))
+        except:
+            pass
 
     def _on_change(self, expression, value):
         self.pin(bool(value))

@@ -18,6 +18,10 @@ class AssignHandler:
         self.topic = topic
         self.mqtt = mqtt
         self.expression = mqtt.subscribe_expression(expression, self._on_change)
+        try:
+            self.mqtt.publish(self.topic, self.expression.evaluate())
+        except:
+            pass
 
     def _on_change(self, expression, value):
         self.mqtt.publish(self.topic, value)
