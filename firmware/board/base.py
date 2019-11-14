@@ -54,9 +54,9 @@ class Board():
         self.pins_by_name[name] = pin
         return pin
 
-    def get_pin(self, id):
-        if type(id) is int:
-            return self.pins_by_num[id]
-        if type(id) is str:
-            return self.pins_by_name[id]
-        raise TypeError("id has to be int or str, not {0}".format(type(id)))
+    def get_pin(self, pin_id):
+        if type(pin_id) is int:
+            return self.pins_by_num[pin_id]
+        if type(pin_id) is str:
+            return self.pins_by_name[pin_id]
+        raise TypeError("pin_id has to be int or str, not {0}".format(type(pin_id)))
