@@ -45,7 +45,10 @@ class Config:
                 imported = __import__("parts." + partname, globals(), locals(), [classname])
                 try:
                     instance = getattr(imported, classname)(partconfig, services)
-                    instance.boot()
+                    try:
+                        instance.boot()
+                    except Exception as e:
+                        print("Instance boot failed: {0}: {1}".format(type(e).__name__, str(e)))
                 except Exception as e:
                     print("Instantiation failed: {0}: {1}".format(type(e).__name__, str(e)))
             except Exception as e:
