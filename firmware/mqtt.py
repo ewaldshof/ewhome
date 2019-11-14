@@ -1,7 +1,10 @@
+import math
+import random
 from task import Task
 import ujson
 from umqtt.simple import MQTTClient
 import ure
+import utime
 
 class MQTT(Task):
 
@@ -148,6 +151,31 @@ class Expression:
         self.expression = expression
         self.python = expression
         self.expr_globals = {
+            "dew"  : self._dewpoint,
+            "sqrt" : math.sqrt,
+            "exp"  : math.exp,
+            "abs"  : math.fabs,
+            "floor": math.floor,
+            "ceil" : math.ceil,
+            "fmod" : math.fmod,
+            "log"  : math.log,
+            "log10": math.log10,
+            "pow"  : math.pow,
+            "acos" : math.acos,
+            "asin" : math.asin,
+            "atan" : math.atan,
+            "atan2": math.atan2,
+            "cos"  : math.cos,
+            "hypot": math.hypot,
+            "sin"  : math.sin,
+            "tan"  : math.tan,
+            "trunc": math.trunc,
+            "degrees" : math.degrees,
+            "radians" : math.radians,
+            "randint" : random.randint,
+            "uniform" : random.uniform,
+            "gauss"   : random.gauss,
+            "time"    : utime.time,  #only available in micropython
             "mqtt_get_value": mqtt.get_cached_or_raise,
         }
         self._analyze(expression)
@@ -159,6 +187,18 @@ class Expression:
         topic_re = ure.compile(r'[A-Za-z0-9_][A-Za-z0-9_./]+/[A-Za-z0-9_.]*[A-Za-z0-9_]')
         # There's also no find_all, and on the ESP32 no match.end(), therefore we use sub() to collect topics.
         self.python = topic_re.sub(self._replace_in_expr, expression)
+
+    def _dewpoint(self, rel_humidity, temperature):
+        humidity /= 100.0
+        v = math.log10(humidity)+ 7.5*temperature/(237.3+temperature)
+        tk = temperature + 273.15
+        dd = humidity * 6.1078 * pow(10,7.5*temperature/(237.3+temperature))
+        Rstar = 8314.3 #J/(kmol*K)
+        m_w = 1801600.0 # kg/(10e5 kmol)
+        return {
+            "dewpoint": 237.3*v/(7.5-v),
+            "abs_humidity": (m_w/Rstar)*dd/tk,
+        }
 
     def _on_mqtt(self, topic, value):
         # Try evaluating the expression. If there are errors, don't notify our observer.
