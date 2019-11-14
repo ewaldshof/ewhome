@@ -15,6 +15,7 @@ class Temperature(Task):
         self.mqtt = mqtt
         self.ds = DS18X20(OneWire(pin))
         self.sensors = list(map(Sensor, self.ds.scan()))
+        print("Found {0} DS18x20 sensors.".format(len(self.sensors)))
         self.interval = self.countdown = 1000 * self.interval_s
 
     def update(self, scheduler):
