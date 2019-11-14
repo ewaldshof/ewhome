@@ -26,7 +26,7 @@ class Config:
         self.listeners = []
         self.read_cache()
         self.init_parts()
-        mqtt.subscribe(mqtt.PREFIX + "/config", self.on_mqtt)
+        mqtt.subscribe("config", self.on_mqtt)
 
     def init_parts(self):
         if self.parts_initialized:

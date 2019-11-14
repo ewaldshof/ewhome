@@ -24,7 +24,7 @@ class Temperature(Task):
                 try:
                     sensor.temperature = self.ds.read_temp(sensor.address)
                     self.mqtt.publish(
-                        self.mqtt.PREFIX + "/ds18x20/" + sensor.hex_address,
+                        "ds18x20/" + sensor.hex_address,
                         sensor.get_data(),
                         retain=True,
                     )

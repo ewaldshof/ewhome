@@ -67,7 +67,9 @@ class MQTT(Task):
     def on_disconnect(self):
         print("-x- MQTT disconnected")
 
-    def subscribe(self, topic, callback):
+    def subscribe(self, topic, callback, use_prefix=True):
+        if use_prefix:
+            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
         # Build a regex that converts MQTT wildcards to regexes for subscription filtering.
         regex = topic
         for (from_re, to) in MQTT.MQTT_TO_REGEX.items():
@@ -107,7 +109,9 @@ class MQTT(Task):
         expr.subscribe(callback)
         return expr
 
-    def publish(self, topic, data, retain=False):
+    def publish(self, topic, data, retain=False, use_prefix=True):
+        if use_prefix:
+            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
         message = ujson.dumps(data)
         print("-{0}> MQTT {1}{2}: {3}".format(
             "-" if self.connected else " ", topic, " (retain)" if retain else "", message
