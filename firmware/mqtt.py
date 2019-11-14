@@ -158,6 +158,7 @@ class Expression:
     def __init__(self, mqtt, expression):
         self.mqtt = mqtt
         self.topics = []
+        expression = str(expression)
         self.expression = expression
         self.python = expression
         self.expr_globals = {
