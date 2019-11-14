@@ -12,7 +12,7 @@ class Board(BaseBoard):
         self.init_ds18x20(
             ow_pin=self.init_pin(0, "Temperature 1-Wire", Pin.OUT)
         )
-        mapping = {
+        out_mapping = {
             "1_1": 25,
             "1_3": 12,
             "1_5": 13,
@@ -21,5 +21,13 @@ class Board(BaseBoard):
             "2_5": 23,
             "2_7": 22,
         }
-        for name, num in mapping.items():
+        for name, num in out_mapping.items():
             self.init_pin(num, name, Pin.OUT)
+        in_mapping = {
+            "5_1": 34,
+            "5_3": 35,
+            "5_5": 32,
+            "5_7": 33,
+        }
+        for name, num in in_mapping.items():
+            self.init_pin(num, name, Pin.IN)
