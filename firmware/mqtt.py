@@ -127,11 +127,17 @@ class MQTT(Task):
         # At this point, the message was not sent and we are probably disconnected. Deliver locally.
         self.callback(topic, data, unjson=False) # no need to convert JSON back and forth
 
-    def get_cached(self, topic, default=None):
+    def get_cached(self, topic, default=None, use_prefix=True):
+        if use_prefix:
+            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
         return self.cache[topic] if topic in self.cache else default
 
-    def get_cached_or_raise(self, topic, default=None):
-        return self.cache[topic] if topic in self.cache else default
+    def get_cached_or_raise(self, topic, use_prefix=True):
+        if use_prefix:
+            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
+        if topic not in self.cache:
+            raise KeyError(topic)
+        return self.cache[topic]
 
     def update(self, scheduler):
         if not self.connected:
