@@ -188,7 +188,7 @@ class Expression:
 
     def _analyze(self, expression):
         # MicroPython doesn't support \w in character classes, hence we write them out.
-        topic_re = ure.compile(r'[A-Za-z0-9_][A-Za-z0-9_./]+/[A-Za-z0-9_.]*[A-Za-z0-9_]')
+        topic_re = ure.compile(r'[A-Za-z0-9_][A-Za-z0-9_./-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_]')
         # There's also no find_all, and on the ESP32 no match.end(), therefore we use sub() to collect topics.
         self.python = topic_re.sub(self._replace_in_expr, expression)
 
