@@ -23,12 +23,14 @@ class MQTT(Task):
     def __init__(self, network):
         super().__init__()
         self.connected = False
+        self.callback_called = False
         self.subscriptions = []
         self.cache = {}
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
 
     def callback(self, topic, msg, unjson=True):
+        self.callback_called = True
         topic = topic.decode("utf-8")
         if unjson:
             try:
@@ -147,8 +149,14 @@ class MQTT(Task):
             except:
                 pass
         else:
+            self.callback_called = False
             try:
-                self.client.check_msg()
+                while True:
+                    self.client.check_msg()
+                    if not self.callback_called:
+                        break
+                    self.callback_called = False
+                self.callback_called = False
             except:
                 self.set_connected(False)
 
