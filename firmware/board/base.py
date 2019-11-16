@@ -1,6 +1,7 @@
 from display import Display
 import drivers.ssd1306 as ssd1306
 from machine import I2C, Pin
+import ure
 from temperature import Temperature
 
 class Board():
@@ -12,6 +13,7 @@ class Board():
         self.temperature = None  # because the current code relies on these being set.
         self.pins_by_num = {}
         self.pins_by_name = {}
+        self.digits_re = ure.compile("^[\d]+$")
 
     def init_ds18x20(self, ow_pin):
         print("Initializing DS18X20.")
@@ -55,8 +57,10 @@ class Board():
         return pin
 
     def get_pin(self, pin_id):
-        if type(pin_id) is int:
-            return self.pins_by_num[pin_id]
-        if type(pin_id) is str:
-            return self.pins_by_name[pin_id]
+        try:
+            x = int(pin_id)
+            return self.pins_by_num[x]
+        except ValueError:
+            if type(pin_id) is str:
+                return self.pins_by_name[pin_id]
         raise TypeError("pin_id has to be int or str, not {0}".format(type(pin_id)))
