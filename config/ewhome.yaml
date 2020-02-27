@@ -1,6 +1,27 @@
 # Konfiguration der einzelnen ESPs: Je nach MAC-Adresse, welche Aufgaben habe ich
 # und welche Peripherie ist mit mir verbunden?
 esps:
+  30:ae:a4:59:16:f4:
+    name: Testboard von Kolja
+    parts:
+      assign:
+        test/text: "Config klappt"
+        test/expr1: abs(-cos(0))
+        test/expr2: hex(5) if all((True, True, True)) else 0
+        test/expr3: 0      if all((True, True, False)) else bin(5)
+        test/expr4: chr(97) if any((True, True, False)) else 0
+        test/expr5: 0 if any((False, False, False)) else len((1,2,3))
+        test/expr6: min(max(1,7), 5)
+        test/list:  (5.7, -.2, 18.5, ord('a'))
+        test/expr7: list(map(round, reversed(test/list)))
+        #test/expr8: "list(filter(lambda x: x>0, test/list))
+
+      output_pins:
+        25: 0
+
+
+         
+
   b4:e6:2d:8f:c8:29:
     name: Test Tim o. Pins
   b4:e6:2d:8f:bc:59:
@@ -76,3 +97,23 @@ ds18x20:
   28ff810aa7150328: A/1/3/kreis4
   28ff44ab90170516: A/1/3/kreis5
   28ffd1c5c11604bc: A/1/3/vorlauf
+
+# configuration der Temperaturanzeige in der App
+raeume:
+  A/2/3:
+    name:       "Bad"
+    fbh_kreise: 3 
+  A/2/4:
+    name:       "Büro"
+    fbh_kreise: 2 
+  A/1/1:
+    name:       "Seminar"
+    fbh_kreise: 4
+  A/1/2:
+    name:       "Wohnen"
+    fbh_kreise: 5
+  A/1/3:
+    name:       "Küche"
+    fbh_kreise: 5
+  
+     

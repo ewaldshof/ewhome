@@ -1,6 +1,7 @@
 from json import dumps
 import paho.mqtt.client as paho
 import time
+import io
 
 from yaml import load
 try:
@@ -16,7 +17,7 @@ published = False
 
 
 def read_yaml_file(filename):
-    with open(filename, "r") as file:
+    with io.open(filename, mode="r", encoding="utf-8") as file:
         config = load(file, Loader=Loader)
     return config
 
