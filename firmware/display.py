@@ -26,6 +26,10 @@ class Display(Task):
         self.redraw()
 
     def redraw(self):
+        
+        if self.driver is None:
+            return 
+
         # Clear display.
         self.driver.fill(0)
 
@@ -60,5 +64,8 @@ class Display(Task):
             self.redraw()
 
     def clear(self):
+        if self.driver is None:
+            return 
+
         self.driver.fill(0)
         self.driver.show()

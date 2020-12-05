@@ -1,8 +1,13 @@
 from parts import Part
 from task import Task
 
-# Example configuration:
 # proportional: # outputs value in range [0.0:1.0]
+# creates a linear ramp with width "spread" centered around "midpoint"
+# 0.0 if sensor <= (midpoint - spread/2)
+# 1.0 if sensor >= (midpoint + spread/2)
+# useful for pid controllers
+# Example configuration:
+#
 #   A1.1/heating:
 #     sensor: A1.1/luft
 #     midpoint: 21 #in °C

@@ -32,15 +32,20 @@ class Board():
         oled_i2c = I2C(-1, scl=scl_pin, sda=sda_pin)
 
         try:
-            self.display = Display(
-                ssd1306.SSD1306_I2C(128, 64, oled_i2c),
-                self.network,
-                self.mqtt,
-            )
-            self.display.clear()
-            print("SSD1306 initialized.")
+            driver = ssd1306.SSD1306_I2C(128, 64, oled_i2c)
         except OSError as err:
            print("OS error: {0}".format(err))
+           driver = None
+        print("Display driver: ", driver)   
+        self.display = Display(
+            driver,
+            self.network,
+            self.mqtt,
+        )
+        print("Display: ", Display)
+        self.display.clear()
+        print("SSD1306 initialized.")
+    
 
     def init_pin(self, number, name, mode=-1, pull=None):
         number = int(number)
