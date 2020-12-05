@@ -70,7 +70,7 @@ esps:
     name: Testboard Alpha
 
   a4:cf:12:25:9d:80:
-    name: Testboard Woo
+    name: Testboard Woo2
 
 # Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
 ds18x20:
