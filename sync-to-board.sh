@@ -47,7 +47,7 @@ done
 shift $((OPTIND - 1))
 
 # Make sure we have a port.
-PORT="${1:-$EWHOME_PORT}"
+PORT="${1:-$ESP_PORT}"
 [ "$PORT" = '' ] && usage
 
 # If there was no tool selected manually, find one.
