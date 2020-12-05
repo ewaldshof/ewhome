@@ -19,11 +19,9 @@ esps:
       output_pins:
         25: 0
 
-
-         
-
   b4:e6:2d:8f:c8:29:
     name: Test Tim o. Pins
+
   b4:e6:2d:8f:bc:59:
     te_antriebe:
       A1.1:
@@ -33,6 +31,7 @@ esps:
     ds18b20: 2_1
     fbh_regler:
       - A1.1
+
   cc:50:e3:b6:87:b8:
     name: Testboard Beta
     parts:
@@ -66,8 +65,12 @@ esps:
         1-5: A/1/3/antrieb_status[2]
         2-1: A/1/3/antrieb_status[3]
         2-3: A/1/3/antrieb_status[4]
+
   cc:50:e3:b6:87:dc:
     name: Testboard Alpha
+
+  a4:cf:12:25:9d:80:
+    name: Testboard Woo
 
 # Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
 ds18x20:
