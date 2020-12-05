@@ -82,7 +82,7 @@ fi
 }
 
 my_rsync() {
-	rsync -av --delete-excluded --exclude __pycache__ "$@"
+	rsync -av --delete-excluded --exclude __pycache__ --exclude wlan.json.example "$@"
 }
 
 # Get the contents of the "firmware" directory (and only these).
