@@ -99,3 +99,106 @@ Beispielaufruf:
 bump2version --tag --commit minor
 git push origin master --tags
 ```
+
+# EWH ESP Board
+
+This project contains the MicroPython firmware setup for the ewh esp board, as well as some helpful scripts to flash MicroPython to a board and copy firmware files over.
+
+## Software setup ???
+
+This repository is using submodules.
+The build script will automatically try to clone them if they're missing, but you can also do it manually, either by specifying `--recurse-submodules` directly when running `git clone`, or by running `git submodule update --init` afterwards.
+
+### Python
+
+You need to have Python 3 available via a command called `python3`.
+The minimum minor version has not been decided yet; 3.7 should be enough.
+
+### Pipenv
+
+We're using [Pipenv](https://pipenv.pypa.io/) to set up Python dependencies.
+If you don't have it yet, install it using a command like `sudo apt install pipenv`, `pip3 install --user pipenv`, or whatever your local machine requires.
+Please refer to [the Pipenv installation docs](https://pipenv.pypa.io/en/latest/install/) if you're having trouble.
+
+### Environment variables
+
+Even if everyone is using the same _code_ when working with a project, some things are still different depending on the machine the code runs _on_.
+The usual way of changing these things without writing them directly into the code is to configure them using _environment variables_.
+
+The way you set an environment variable depends on your operating system and shell and is out of scope for this document, but there is another way supported by Pipenv:
+Creating a `.env` file.
+This is simply a file, named `.env`, that contains environment variable assignments, one per line.
+
+Here is an example `.env` file for this project, that also serves as the template for your personal `.env` file.
+Copy it and edit it for your system.
+
+```
+# The serial port your board is connected to.
+ESP_PORT=/dev/ttyUSB0
+
+# This variable defines the MicroPython version to use.
+# You should only change it if you have a good reason.
+ESP_MICROPYTHON=esp32-idf3-20200902-v1.13
+
+# The following settings just set other variables based on the values above.
+# You should not need to edit anything here.
+ESPTOOL_PORT=${ESP_PORT}
+RSHELL_PORT=${ESP_PORT}
+```
+
+The `.env` file is local to your system and should not be committed.
+
+### Dependencies
+
+You're done with the hardest part once you have a working Pipenv and your environment variables set.
+Installing all the dependencies is now simply running
+
+```sh
+pipenv install
+```
+
+## Provisioning a board
+
+To run this project on a microcontroller board, the board needs to have two things:
+MicroPython, and the Tally code.
+
+* When you're developing on this project, you typically install MicroPython only once to the board, and copy over Tally code every time you changed something in it.
+* When you're not developing, but just want to provision a board, you do both things only once.
+
+### Getting MicroPython
+
+There is a Pipenv script that will download the correct version of MicroPython for you.
+It will place a file ending in `.bin` into the `micropython` directory.
+Call it like this:
+
+```sh
+pipenv run get-micropython
+```
+
+The script currently depends on `curl` being available on your system.
+If you don't have it, either install it, or get the MicroPython binary manually by downloading the file referred to by `TALLY_MICROPYTHON` in your `.env` file from [the MicroPython ESP32 download page](https://micropython.org/download/esp32/).
+
+### Flashing MicroPython
+
+You need to first wipe the board's flash memory and then flash MicroPython.
+There are helper scripts for this, too.
+Call them like this:
+
+```sh
+pipenv run erase-flash
+pipenv run flash-micropython
+```
+
+### Flashing the Tally code
+
+There is another helper script which will copy everything in the `src` directory over to the board (and also delete any files on the board that are not in `src`, to have a clean environment).
+Simply call:
+
+```sh
+pipenv run sync-code
+```
+
+## Debugging
+
+For an interactive Python shell, you can either connect with a serial terminal emulator directly to the board or use `pipenv run repl`.
+Once connected, press <kbd>Ctrl</kbd>+<kbd>C</kbd> to enter interactive mode instead of just watching log messages.
