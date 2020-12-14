@@ -19,8 +19,7 @@ scheduler = Scheduler()
 
 config = Config(board, network, mqtt, scheduler)
 
-name = Name(config, board.display)
-
+name = Name(config, board.display) 
 scheduler.register(board.display)
 scheduler.register(board.temperature)
 scheduler.register(heartbeat)

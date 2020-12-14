@@ -1,7 +1,7 @@
 # Konfiguration der einzelnen ESPs: Je nach MAC-Adresse, welche Aufgaben habe ich
 # und welche Peripherie ist mit mir verbunden?
 esps:
-  30:ae:a4:59:16:f4:
+  cc:50:e3:b6:87:b1:
     name: Testboard von Kolja
     parts:
       assign:
@@ -14,14 +14,22 @@ esps:
         test/expr6: min(max(1,7), 5)
         test/list:  (5.7, -.2, 18.5, ord('a'))
         test/expr7: list(map(round, reversed(test/list)))
+        testoutput: 1
         #test/expr8: "list(filter(lambda x: x>0, test/list))
 
       output_pins:
-        25: 0
+        1-1: 1
+        1-3: 1
+        1-5: 1
+        2-1: 1
+        2-3: 1
+        2-5: 1
+        2-7: 1
+
+         
 
   b4:e6:2d:8f:c8:29:
     name: Test Tim o. Pins
-
   b4:e6:2d:8f:bc:59:
     te_antriebe:
       A1.1:
@@ -32,8 +40,8 @@ esps:
     fbh_regler:
       - A1.1
 
-  cc:50:e3:b6:87:b8:
-    name: Testboard Beta
+  30:ae:a4:59:16:f4:
+    name: A1.3 Küche FBH
     parts:
       assign:
         # A/1/3/luft: ds18x20/28ff8e8d83170400["temperature_c"]
@@ -46,6 +54,7 @@ esps:
             A/1/3/kreis4,
             A/1/3/kreis5,
           ]
+        # NO actuators need a 0 level to heat the room
         A/1/3/antrieb_status: |
           [
             A/1/3/heating_level < 0.3,
@@ -57,20 +66,93 @@ esps:
       proportional:
         A/1/3/heating_level:
           sensor: A/1/3/luft
-          midpoint: 24.1
+          midpoint: A/1/3/soll
           spread: 2
-      output_pins:
+          interval: 1
+      output_pins: 
+#        1-1: 1
+#        1-3: 1
+#        1-5: 1
+#        2-1: 1
+#        2-3: 1
+#        2-5: 1
+#        2-7: 1
         1-1: A/1/3/antrieb_status[0]
         1-3: A/1/3/antrieb_status[1]
         1-5: A/1/3/antrieb_status[2]
         2-1: A/1/3/antrieb_status[3]
         2-3: A/1/3/antrieb_status[4]
 
+  cc:50:e3:b6:87:b8:
+    name: A1.2 Wohnen FBH
+    parts:
+      assign:
+        # A/1/3/luft: ds18x20/28ff8e8d83170400["temperature_c"]
+        # A/1/3/vorlauf: ds18x20/28ffd1c5c11604bc["temperature_c"]
+        A/1/2/ruecklauf: |
+          [
+            A/1/2/kreis1,
+            A/1/2/kreis2,
+            A/1/2/kreis3,
+            A/1/2/kreis4,
+            A/1/2/kreis5,
+          ]
+        A/1/2/antrieb_status: |
+          [
+            A/1/2/heating_level < 0.3,
+            A/1/2/heating_level < 0.4,
+            A/1/2/heating_level < 0.5,
+            A/1/2/heating_level < 0.6,
+            A/1/2/heating_level < 0.7,
+          ]
+      proportional:
+        A/1/2/heating_level:
+          sensor: A/1/2/luft
+          midpoint: A/1/3/soll
+          spread: 2
+      output_pins:
+        1-1: A/1/2/antrieb_status[0]
+        1-3: A/1/2/antrieb_status[1]
+        1-5: A/1/2/antrieb_status[2]
+        2-1: A/1/2/antrieb_status[3]
+        2-3: A/1/2/antrieb_status[4]
+
+  b4:e6:2d:8f:c9:51:
+    name: A1.1 Seminar FBH
+    parts:
+      assign:
+        # A/1/1/luft: ds18x20/28ff8e8d83170400["temperature_c"]
+        # A/1/1/vorlauf: ds18x20/28ffd1c5c11604bc["temperature_c"]
+        A/1/1/ruecklauf: |
+          [
+            A/1/1/kreis1,
+            A/1/1/kreis2,
+            A/1/1/kreis3,
+            A/1/1/kreis4,
+            A/1/1/kreis5,
+          ]
+        A/1/1/antrieb_status: |
+          [
+            A/1/1/heating_level < 0.3,
+            A/1/1/heating_level < 0.4,
+            A/1/1/heating_level < 0.5,
+            A/1/1/heating_level < 0.6,
+            A/1/1/heating_level < 0.7,
+          ]
+      proportional:
+        A/1/1/heating_level:
+          sensor: A/1/1/luft
+          midpoint: A/1/1/soll
+          spread: 2
+      output_pins:
+        1-1: A/1/1/antrieb_status[0]
+        1-3: A/1/1/antrieb_status[1]
+        1-5: A/1/1/antrieb_status[2]
+        2-1: A/1/1/antrieb_status[3]
+        2-3: A/1/1/antrieb_status[4]
+      
   cc:50:e3:b6:87:dc:
     name: Testboard Alpha
-
-  a4:cf:12:25:9d:80:
-    name: Testboard Woo2
 
 # Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
 ds18x20:

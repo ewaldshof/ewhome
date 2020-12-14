@@ -12,9 +12,8 @@ except ImportError:
 
 config_file = "ewhome.yaml"
 broker_address = "10.0.0.88"
-topic_conf_complete = "ewhome/config"
-topic_base = "ewhome/board/"
-all_published = False
+topic = "ewhome/config"
+published = False
 
 
 def read_yaml_file(filename):
@@ -25,22 +24,14 @@ def read_yaml_file(filename):
 def to_json(config):
     return dumps(config)
 
+
 def on_connect(client, userdata, flags, rc):
-    #client.publish(topic_conf_complete, data, qos=1, retain=True)
-    print(yaml_config["esps"].keys())
-    for key, value in yaml_config["esps"].items():
-        print(key, value)
-        client.publish(
-            topic_base + key + "/config", 
-            to_json(value), 
-            qos=1, 
-            retain=True)
-    global all_published
-    all_published = True
+    client.publish(topic, data, qos=1, retain=True)
 
 def on_publish(client, userdata, result):
-    if all_published:
-        client.disconnect()
+    global published
+    published = True
+    client.disconnect()
 
 def on_log(mqttc, obj, level, string):
     print(string)
@@ -55,8 +46,7 @@ def connect_and_push():
 
 
 if __name__ == "__main__":
-    yaml_config = read_yaml_file(config_file)
-    data = to_json(yaml_config)
+    data = to_json(read_yaml_file(config_file))
     connect_and_push()
-    while not all_published:
+    while not published:
         time.sleep(0.1)

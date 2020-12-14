@@ -12,7 +12,6 @@ except:
 
 cachedir = "/cache"
 cachefile = cachedir + "/config.json"
-config_topic_base = "board/"
 
 class Config:
 
@@ -28,8 +27,7 @@ class Config:
         self.listeners = [self.board.temperature._on_config_update] # TODO: Hack until Temperature becomes a Part.
         self.read_cache()
         self.init_parts()
-        # new config topics: ewhome/board/[self.mac]/config
-        mqtt.subscribe(config_topic_base + self.mac + "/config", self.on_mqtt)
+        mqtt.subscribe("config", self.on_mqtt)
 
     def init_parts(self):
         if self.parts_initialized:
@@ -78,7 +76,7 @@ class Config:
 
     def set_data(self, data):
         self.data = data
-        self.mine = data
+        self.mine = data.get("esps", {}).get(self.mac, None)
         for listener in self.listeners:
             listener(self)
 
