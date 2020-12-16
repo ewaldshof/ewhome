@@ -23,7 +23,7 @@ class Config:
         self.mac = network.mac
         self.data = {}
         self.mine = None
-        self.version = "0.6.0"
+        self.version = "0.7.0"
         self.listeners = [self.board.temperature._on_config_update] # TODO: Hack until Temperature becomes a Part.
         self.read_cache()
         self.init_parts()
