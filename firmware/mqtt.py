@@ -25,6 +25,7 @@ class MQTT(Task):
         self.connected = False
         self.callback_called = False
         self.subscriptions = []
+        self.topics = []
         self.cache = {}
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
@@ -39,7 +40,9 @@ class MQTT(Task):
                 # Don't pass non-JSON payloads around.
                 print("<!- MQTT {0} non-JSON payload rejected: {1}".format(topic, msg))
                 return
-        print("<-- MQTT {0}: {1}".format(topic, msg))
+        if not topic.endswith('/config'):
+            # Config is too large for the memory.
+            print("<-- MQTT {0}: {1}".format(topic, msg))
         self.cache[topic] = msg
         for subscription in self.subscriptions:
             if subscription["re"].match(topic):
@@ -58,8 +61,7 @@ class MQTT(Task):
 
     def on_connect(self):
         print("o-o MQTT connected")
-        for subscription in self.subscriptions:
-            topic = subscription["topic"]
+        for topic in self.topics:
             print("~~~ MQTT subscribe on {0}".format(topic))
             try:
                 self.client.subscribe(topic)
@@ -87,18 +89,21 @@ class MQTT(Task):
             "callback": callback,
         }
         for subscription in self.subscriptions:
-            for k in ("topic", "callback"):
-                if new_subscription[k] != subscription[k]:
-                    break
+            identical = new_subscription['topic'] == subscription['topic'] \
+                and new_subscription['callback'] == subscription['callback']
+            if identical:
                 print("Duplicate subscription on {0} for same callback, returning old id {1}".format(
                     subscription["topic"], subscription["id"]
                 ))
                 return subscription["id"]
         self.subscriptions.append(new_subscription)
+        new_topic = new_subscription['topic'] not in self.topics
+        if new_topic:
+            self.topics.append(new_subscription['topic'])
         sub_id = len(self.subscriptions) - 1
         new_subscription["id"] = sub_id
         print("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
-        if self.connected:
+        if self.connected and new_topic:
             try:
                 print("~~~ MQTT subscribe on {0}".format(topic))
                 self.client.subscribe(topic)
@@ -200,6 +205,9 @@ class Expression:
         self._analyze(expression)
         self.topics = list(set(self.topics))  # remove duplicates
         print("Expression `{0}` becomes `{1}`, has topics: {2}".format(expression, self.python, self.topics))
+
+    def __str__(self):
+        return self.expression
 
     def _analyze(self, expression):
         # MicroPython doesn't support \w in character classes, hence we write them out.
