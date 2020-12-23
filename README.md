@@ -57,7 +57,8 @@ Ein Board, das noch kein aktuelles MicroPython aufgespielt bekommen hat, lässt 
 
 1. `esptool.py` besorgen via `pip install esptool`. **Nicht** das `esptool` aus den Debian-/Ubuntu-Paketen benutzen.
 2. Sicherstellen, dass du wie oben beschrieben [den Port konfiguriert](#port-konfiguration) hast.
-3. Das Script `flash-firmware.sh` ausführen.
+3. Sicherstellen, dass die Flash-Pins des Boards nicht mit anderen Funktionen belegt sind. Am Besten das Board vom Basisboard trennen.
+4. Das Script `flash-firmware.sh` ausführen.
 
 ## Dateien auf ESP32 übertragen
 
