@@ -14,23 +14,16 @@ from task import Task
 #     spread: 2
 #     interval: 60
 
-class Proportional(Part):
+class Proportional(Part, Task):
 
-    def boot(self):
-        self.handlers = {}
-        for topic, config in self.config.items():
-            self.handlers[topic] = ProportionalHandler(self.mqtt, topic, **config)
-            self.scheduler.register(self.handlers[topic])
-
-class ProportionalHandler(Task):
-
-    def __init__(self, mqtt, topic, sensor, midpoint, spread, interval=60):
-        self.mqtt = mqtt
-        self.topic = topic
-        self.sensor = mqtt.subscribe_expression(sensor, self._noop)
-        self.midpoint = mqtt.subscribe_expression(midpoint, self._noop)
-        self.spread = mqtt.subscribe_expression(spread, self._noop)
-        self.countdown = self.interval = 1000 * interval
+    def __init__(self, key, content):
+        self.topic = key
+        assert {"sensor"}.issubset(content), "parameter missing from proportional {}".format(key)
+        self.sensor = Part.mqtt.subscribe_expression(content["sensor"], self._on_change)
+        self.midpoint = Part.mqtt.subscribe_expression(content.get("midpoint", "20"), self._on_change)
+        self.spread = Part.mqtt.subscribe_expression(content.get("spread", "2"), self._on_change)
+        self.countdown = self.interval = 1000 * content.get("interval", 60)
+        Part.scheduler.register(self)
 
     def update(self, scheduler):
         result = 0.0  # Default if anything goes wrong.
@@ -43,7 +36,9 @@ class ProportionalHandler(Task):
             result = min(1.0, max(0.0, result))
         except:
             pass
-        self.mqtt.publish(self.topic, result, retain=True)
+        Part.mqtt.publish(self.topic, result, retain=True)
 
-    def _noop(self, expression, value):
+    def _on_change(self, expression, value):
         pass
+
+

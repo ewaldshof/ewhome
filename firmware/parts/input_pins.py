@@ -8,21 +8,20 @@ from parts import Part
 
 class InputPins(Part):
 
-    def boot(self):
-        self.handlers = {}
-        for topic, pin_name in self.config.items():
-            if pin_name in self.handlers:
-                raise RuntimeError("cannot associate topic {0} to pin {1}, pin already in use".format(topic, pin_name))
-            self.handlers[pin_name] = InputPinHandler(self.mqtt, self.board.get_pin(pin_name), topic)
+    # "key" is topic the input should be bound to
+    # content is a single pin name
+    # "content" is an expression to be assigned to the pin
+    def __init__(self, key, content):
+        print("assigning input pin {} to topic {}".format(content, key))
+        self.topic = key 
+        self.pin = Part.board.get_pin(content)
+        self.pin.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=self._on_change)
 
-class InputPinHandler:
-
-    def __init__(self, mqtt, pin, topic):
-        self.mqtt = mqtt
-        self.pin = pin
-        self.topic = topic
-        pin.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=self._on_change)
-
+        try:
+            self.pin(bool(self.expression.evaluate()))
+        except:
+            pass
+ 
     def _on_change(self, pin):
         # TODO: Debouncing.
         self.mqtt.publish(self.topic, bool(pin()))

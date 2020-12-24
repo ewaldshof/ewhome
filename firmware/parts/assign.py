@@ -7,21 +7,18 @@ from parts import Part
 
 class Assign(Part):
 
-    def boot(self):
-        self.handlers = {}
-        for topic, expression in self.config.items():
-            self.handlers[topic] = AssignHandler(self.mqtt, topic, expression)
 
-class AssignHandler:
-
-    def __init__(self, mqtt, topic, expression):
-        self.topic = topic
-        self.mqtt = mqtt
-        self.expression = mqtt.subscribe_expression(expression, self._on_change)
+    # content is a single line containing the expression to be evaluated
+    def __init__(self, key, content):
+        self.topic = key 
+        self.expression = Part.mqtt.subscribe_expression(content, self._on_change)
+        #do one initial evaluation
+        #self.expression._on_mqtt(self.topic, "")
         try:
             self.mqtt.publish(self.topic, self.expression.evaluate())
         except:
             pass
-
+            
     def _on_change(self, expression, value):
-        self.mqtt.publish(self.topic, value)
+        Part.mqtt.publish(self.topic, value)
+

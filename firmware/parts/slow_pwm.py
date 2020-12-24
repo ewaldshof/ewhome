@@ -8,22 +8,15 @@ from task import Task
 #     period: 60     #pwm perdiod is 60 seconds
 #     ration: 0.6    #60% of the period the signal is high
 
-class SlowPwm(Part):
+class SlowPwm(Part, Task):
 
-    def boot(self):
-        self.handlers = {}
-        for topic, config in self.config.items():
-            self.handlers[topic] = SlowPwmHandler(self.mqtt, topic, **config)
-            self.scheduler.register(self.handlers[topic])
-
-class SlowPwmHandler(Task):
-
-    def __init__(self, mqtt, topic, period=60, ratio=0):
-        self.mqtt = mqtt
-        self.topic = topic
+    def __init__(self, key, content):
+    # mqtt, topic, period=60, ratio=0):
+        self.topic = key
         self.value = True
-        self.period = mqtt.subscribe_expression(period, self._noop)
-        self.ratio = mqtt.subscribe_expression(ratio, self._noop)
+        self.period = Part.mqtt.subscribe_expression(content.get("period", "60"), self._on_change)
+        self.ratio = Part.mqtt.subscribe_expression(content.get("ratio", "0.5"), self._on_change)
+        Part.scheduler.register(self)
         self.update()
 
     def eval_period(self):
@@ -31,9 +24,9 @@ class SlowPwmHandler(Task):
             self.current_period = self.period.evaluate()
             self.current_ratio = self.ratio.evaluate()
         except:
-            print("exception in SlowPwm.eval_period {}".format(e))
+            print("exception in SlowPwm.eval_period {} for instance {}".format(e, self.topic))
             self.current_period = 60
-            self.current_ratio = 0
+            self.current_ratio = 0.5
 
     def update(self, scheduler=None):
         if self.value:
@@ -42,7 +35,7 @@ class SlowPwmHandler(Task):
         else:
             self.countdown = self.interval = 1000 * self.current_period * self.current_ratio
         self.value = not self.value
-        self.mqtt.publish(self.topic, self.value, retain=True)
+        Part.mqtt.publish(self.topic, self.value, retain=True)
 
-    def _noop(self, expression, value):
+    def _on_change(self, expression, value):
         pass
