@@ -2,7 +2,7 @@ from display import Display
 import drivers.ssd1306 as ssd1306
 from machine import I2C, Pin
 import ure
-from temperature import Temperature
+#from temperature import Temperature
 
 class Board():
 
@@ -10,15 +10,9 @@ class Board():
         self.network = network
         self.mqtt = mqtt
         self.display = None      # Both will need to be initialized by the actual board, at least with a noop class,
-        self.temperature = None  # because the current code relies on these being set.
         self.pins_by_num = {}
         self.pins_by_name = {}
         self.digits_re = ure.compile("^[\d]+$")
-
-    def init_ds18x20(self, ow_pin):
-        print("Initializing DS18X20.")
-        self.temperature = Temperature(ow_pin, self.mqtt)
-        print("DS18X20 initialized.")
 
     def init_ssd1306i2c(self, reset_pin, scl_pin, sda_pin):
         print("Initializing SSD1306.")
@@ -67,5 +61,6 @@ class Board():
             return self.pins_by_num[x]
         except ValueError:
             if type(pin_id) is str:
+                print("pin lookup: ", pin_id, self.pins_by_name[pin_id])
                 return self.pins_by_name[pin_id]
         raise TypeError("pin_id has to be int or str, not {0}".format(type(pin_id)))

@@ -1,3 +1,21 @@
+# each part type is implemented in a file in this directory
+# The folling naming convention must be followed:
+
+# part type in yaml: loweer case separated by underscored. 
+# filename identical to part type + ".py" 
+# e.g. slow_pwm or assign
+
+# Class: First word capitalized, not seperated
+# e.g. SlowPwm or Assign
+
+# Classes must inherit from Part (or possible its subclasses)
+
+# Classes must implement __init__(self, key, content) that is called for each instance where
+# - key is the identifier in the yaml for the instance 
+# - content is the whole config assigned to the identifier. This might be a single string for some parts or a dictionary for others
+from task import Task
+
+
 class Part:
 
     #services are identical over all parts
@@ -12,11 +30,12 @@ class Part:
     @classmethod
     def boot(cls, config):
         cls.instances = {}
+        print(config)
         for key, content in config.items():
             cls.instances[key] = cls(key, content)
 
     @staticmethod
-    def print_exception(e, msg="Exception in Config:"):
+    def print_exception(e, msg="Exception in Part:"):
         print( "\033[91m{0}: {1}: {2}\x1b[0m".format(msg, type(e).__name__, str(e)))
 
     initialized = False
@@ -38,17 +57,34 @@ class Part:
             try:
                 imported = __import__("parts." + partname, globals(), locals(), [classname])
             except Exception as e:
-                Config.print_exception("Import failed", e)
+                Part.print_exception(e, "Import failed")
                 continue
 
             try:
                 cls = getattr(imported, classname)
             except Exception as e:
-                Config.print_exception("getattr failed:", e)
+                Part.print_exception(e, "getattr failed:")
                 continue
 
             try:
                 cls.boot(partconfig)
             except Exception as e:
-                Config.print_exception("Class boot failed:", e)
+                Part.print_exception(e, "Class boot failed:")
                 continue
+
+# class for parts that are updated with a fixed period
+# update is called with the set period in seconds
+class FixedPeriodPart(Part, Task):
+
+    # utility function for multi line componets
+    # sets period member variable from dictionary entry "period" 
+    def schedule_period_from_dict(self, config, default=60, minimum=2, maximum = 3600):
+        print(config)
+        self.period = config.get("period", default)  # this should evaluate an expression!
+        self.period = max(self.period, minimum)
+        self.period = min(self.period, maximum)
+        print("scheduling from dict", self.period )
+        self.countdown = self.interval = 1000 * self.period
+        config.pop("period", None)  #after this the content dictionery should only contain sensor addresses
+        Part.scheduler.register(self)
+ 

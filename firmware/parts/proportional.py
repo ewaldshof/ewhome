@@ -1,5 +1,4 @@
-from parts import Part
-from task import Task
+from parts import FixedPeriodPart, Part
 
 # proportional: # outputs value in range [0.0:1.0]
 # creates a linear ramp with width "spread" centered around "midpoint"
@@ -14,17 +13,19 @@ from task import Task
 #     spread: 2
 #     interval: 60
 
-class Proportional(Part, Task):
+class Proportional(FixedPeriodPart):
 
     def __init__(self, key, content):
         self.topic = key
+        print("key: ", key)
+        print("content: ", content)
+
         assert {"sensor"}.issubset(content), "parameter missing from proportional {}".format(key)
         self.sensor = Part.mqtt.subscribe_expression(content["sensor"], self._on_change)
         self.midpoint = Part.mqtt.subscribe_expression(content.get("midpoint", "20"), self._on_change)
         self.spread = Part.mqtt.subscribe_expression(content.get("spread", "2"), self._on_change)
-        self.countdown = self.interval = 1000 * content.get("interval", 60)
-        Part.scheduler.register(self)
-
+        self.schedule_period_from_dict(content)
+ 
     def update(self, scheduler):
         result = 0.0  # Default if anything goes wrong.
         try:

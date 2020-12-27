@@ -7,10 +7,14 @@ class Task():
     def __init__(self):
         self.countdown = self.interval = 1000
 
+# this method is called when the scheduling even occurs
     def update(self, scheduler):
         pass
 
 class Scheduler():
+    @staticmethod
+    def print_exception(e, msg="Exception in Part:"):
+        print( "\033[91m{0}: {1}: {2}\x1b[0m".format(msg, type(e).__name__, str(e)))
 
     def __init__(self):
         self.tasks = []
@@ -30,8 +34,11 @@ class Scheduler():
     def start(self, interval_ms):
         interval_ms = int(interval_ms)
         self.interval = interval_ms
-        self.timer = Timer(-1)
-        self.timer.init(period=interval_ms, mode=Timer.PERIODIC, callback=self.tick)
+        try:
+            self.timer = Timer(-1)
+            self.timer.init(period=interval_ms, mode=Timer.PERIODIC, callback=self.tick)
+        except Exception as e:
+            Scheduler.print_exception(e, "could not initialize timer")
 
     def run_due_tasks(self, dummy=None):
         for task in self.tasks:

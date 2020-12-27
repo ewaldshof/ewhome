@@ -25,7 +25,7 @@ class Config:
         self.data = {}
         self.mine = None
         self.version = "0.7.0"
-        self.listeners = [self.board.temperature._on_config_update] # TODO: Hack until Temperature becomes a Part.
+        self.listeners = []
         self.read_cache()
         if (type(self.mine) is dict and "parts" in self.mine):
             Part.init_parts(board, mqtt, scheduler, self.mine["parts"])
