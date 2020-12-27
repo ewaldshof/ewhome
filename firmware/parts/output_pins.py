@@ -1,4 +1,5 @@
 from parts import Part
+from color_text import ColorText as ct 
 
 # Example configuration:
 # output_pins:
@@ -9,7 +10,8 @@ class OutputPins(Part):
     # "key" is the name of the pin
     # "content" is an expression to be assigned to the pin
     def __init__(self, key, content):
-        print("assigning topic {} to output pin {}".format(content, key))
+        ct.print_debug("assigning topic {} to output pin {}".format(content, key))
+     
         self.name = key 
         self.pin = Part.board.get_pin(self.name)
         self.expression = Part.mqtt.subscribe_expression(content, self._on_change)

@@ -4,7 +4,7 @@ from ds18x20 import DS18X20
 from onewire import OneWire
 import time
 from ubinascii import hexlify
-import ujson
+from color_text import ColorText as ct 
 
 
 # one wire temperature sensor. One instance per 1-wire-bus with one line per ID
@@ -28,38 +28,36 @@ class Ds18x20(FixedPeriodPart):
         self.converting = False
         self.name = key
         self.pin = Part.board.get_pin(self.name)
-        print("temperature pin", self.pin)
         self.ds = DS18X20(OneWire(self.pin))
     	
         addresses = self.ds.scan()
         
         self.sensors = set()
         for address in addresses:
-            print(address)
             self.sensors.add(Sensor(address, content))
-        print("Found {0} DS18x20 sensors.".format(len(self.sensors)))
-        print(self.sensors)
+        ct.print_info("Found {} DS18x20 sensors.".format(len(self.sensors)))
+        ct.print_debug("\n".join(str(x) for x in self.sensors))
 
         # this removes "period" from the dictionary if it exists, therefore it should be run before counting the elements
         # at the same time it should be run as late as possible
         self.schedule_period_from_dict(content, 60, 2)
         if len(content) > 0:
-            print("configured sensors that are not connceted:\n", content)
+            ct.print_warning("configured sensors that are not connected:")
+            ct.print_warning(content)
  
 
     def update(self, scheduler):
         if self.converting:
-            print("reading temperatures")
+            ct.print_debug("reading temperatures from pin {}".format(self.name))
+
             # We've waited enough for the sensor(s). Read the temperatures.
             for sensor in self.sensors:
-                print("reading temperature from", sensor.hex_address(), "for", sensor.topic)
+                ct.print_debug("reading temperatures from {} for {}".format(sensor.hex_address(), sensor.topic))
                 try:
                     temperature = self.ds.read_temp(sensor.address)
-                    print("publishing temperature=", temperature)
                     Part.mqtt.publish(sensor.topic, temperature, retain=True)
                 except Exception as e:
-                    Part.print_exception(e, "Exception in ds18x20 update")
-                    pass
+                    ct.format_exception(e, "Exception in ds18x20 update for {}".format(sensor.topic))
             # Reset our update interval to the configured one, minus convert time.
             self.interval = self.countdown = 1000 * self.period - 750
         else:
@@ -76,7 +74,10 @@ class Sensor:
         self.address = address
          # get topic from info or create a generic topic if sensor is not configured
         self.topic = mappings.pop(self.hex_address(), "ds18x20/{}".format(self.hex_address()))
-        print("mapped sensor", self.hex_address(), "to topic", self.topic)
+        ct.print_debug("mapped sensor {} to topic {}".format(self.hex_address(), self.topic))
 
     def hex_address(self):
         return hexlify(self.address).decode("utf-8") 
+
+    def __str__(self):
+            return "{} = temperature[{}]".format(self.topic, self.hex_address())

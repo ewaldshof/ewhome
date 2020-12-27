@@ -1,5 +1,6 @@
 from parts import Part
 from task import Task
+from color_text import ColorText as ct 
 
 #slow_pwm: # control signal  duty cycle 
 # Example configuration:
@@ -24,7 +25,7 @@ class SlowPwm(Part, Task):
             self.current_period = self.period.evaluate()
             self.current_ratio = self.ratio.evaluate()
         except:
-            print("exception in SlowPwm.eval_period {} for instance {}".format(e, self.topic))
+            ct.format_exception(e, "Exception in SlowPwm.eval_period for instance {}".format(topic))
             self.current_period = 60
             self.current_ratio = 0.5
 

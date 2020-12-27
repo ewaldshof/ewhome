@@ -9,10 +9,6 @@ class ColorText():
         self.text = text
         self.codes = set()
 
-    def ANSIS(self, codes):
-        self.codes |= {*codes}
-        return self
-
     def ANSI(self, code):
         self.codes.add(code)
         return self
@@ -55,7 +51,7 @@ class ColorText():
     @classmethod
     def format_exception(cls, e, msg="Exception"):
         cls(msg).exception().blink().show()
-        cls.print_exception(f"\t{type(e).__name__}: {str(e)}")
+        cls.print_exception("\t{}: {}".format(type(e).__name__, str(e)))
 
     @classmethod 
     def print_debug(cls, text):
@@ -160,7 +156,6 @@ class ColorText():
 # run tests if called from the command line
 if __name__ == '__main__':
     ColorText("Hello").ANSI(31).ANSI(1).show()
-    ColorText("Hello from list").ANSIS((31,1)).show()
     ColorText("Hello from chain").bold().red().show()
     
     ColorText("Heading").heading().show()

@@ -1,5 +1,6 @@
 from machine import Pin
 from parts import Part
+from color_text import ColorText as ct
 
 # Example configuration:
 # input_pins:
@@ -12,7 +13,8 @@ class InputPins(Part):
     # content is a single pin name
     # "content" is an expression to be assigned to the pin
     def __init__(self, key, content):
-        print("assigning input pin {} to topic {}".format(content, key))
+        ct.print_debug("assigning topic {} to output pin {}".format(content, key))
+
         self.topic = key 
         self.pin = Part.board.get_pin(content)
         self.pin.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler=self._on_change)

@@ -61,6 +61,5 @@ class Board():
             return self.pins_by_num[x]
         except ValueError:
             if type(pin_id) is str:
-                print("pin lookup: ", pin_id, self.pins_by_name[pin_id])
                 return self.pins_by_name[pin_id]
         raise TypeError("pin_id has to be int or str, not {0}".format(type(pin_id)))
