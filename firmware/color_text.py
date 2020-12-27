@@ -34,29 +34,29 @@ class ColorText():
 
     @classmethod 
     def print_ok(cls, text):
-        cls(text).ok().show()
+        cls(str(text)).ok().show()
  
     @classmethod 
     def print_warning(cls, text):
-        cls(text).warning().show()
+        cls(str(text)).warning().show()
 
     @classmethod 
     def print_info(cls, text):
-        cls(text).info().show()
+        cls(str(text)).info().show()
 
     @classmethod 
     def print_exception(cls, text):
-        cls(text).exception().show()
+        cls(str(text)).exception().show()
 
     @classmethod
     def format_exception(cls, e, msg="Exception"):
-        cls(msg).exception().blink().show()
+        cls(str(msg)).exception().blink().show()
         cls.print_exception("\t{}: {}".format(type(e).__name__, str(e)))
 
     @classmethod 
     def print_debug(cls, text):
         if cls.DEBUG:
-            cls(text).debug().show()
+            cls(str(text)).debug().show()
 
     def heading(self):
         return self.bold().blue().underline()
@@ -71,13 +71,13 @@ class ColorText():
         return self.yellow()
 
     def info(self):
-        return self.blue()
+        return self.white()
 
     def exception(self):
         return self.bold().magenta()
 
     def debug(self):
-        return self.faint().cyan()
+        return self.cyan()
 
 
     def reset(self):
@@ -126,7 +126,7 @@ class ColorText():
         return self.ANSI(36)
 
     def white(self):
-        return self.WHITE(37)
+        return self.ANSI(37)
 
     def bg_black(self):
         return self.ANSI(90)
