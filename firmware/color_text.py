@@ -17,11 +17,16 @@ class ColorText():
         self.codes.add(code)
         return self
 
-    def show(self, reset=True):
-        end = "\033[0m\n" if reset else "\n" 
-        print("\033[0", end="")
-        print(*self.codes, sep=";", end="")
-        print("m", self.text, end=end,  sep="")
+    def __str__(self):
+        l = list("\033[")
+        l.append(";".join(map(str, self.codes)))
+        l.append("m")
+        l.append(self.text)
+        l.append("\033[0m")
+        return "".join(l)
+
+    def show(self):
+         print(self)
 
     @classmethod 
     def print_heading(cls, text):
@@ -173,6 +178,11 @@ if __name__ == '__main__':
     ColorText.print_info("Info")
     ColorText.print_exception("Exception")
     ColorText.print_debug("Debug")
+
+    t1 = ColorText("str()").bold().yellow()
+    t1.show()
+    print(t1)
+
 
     try:
         a=1/0
