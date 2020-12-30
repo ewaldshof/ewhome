@@ -69,6 +69,8 @@ class Part:
             except Exception as e:
                 ct.format_exception(e, "Class boot failed:")
                 continue
+        
+        ct.print_debug("Leaving Init Parts")
 
 # class for parts that are updated with a fixed period
 # update is called with the set period in seconds

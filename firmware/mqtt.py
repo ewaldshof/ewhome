@@ -5,6 +5,7 @@ import ujson
 from umqtt.simple import MQTTClient
 import ure
 import utime
+from color_text import ColorText as ct
 
 class MQTT(Task):
 
@@ -102,12 +103,14 @@ class MQTT(Task):
             self.topics.append(new_subscription['topic'])
         sub_id = len(self.subscriptions) - 1
         new_subscription["id"] = sub_id
-        print("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
+        ct.print_info("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
+        ct.print_debug("con: {}, new: {}".format(self.connected, new_topic))
         if self.connected and new_topic:
             try:
                 print("~~~ MQTT subscribe on {0}".format(topic))
                 self.client.subscribe(topic)
-            except:
+            except Exception as e:
+                ct.format_exception(e, "subscription failed")
                 self.set_connected(False)
         return sub_id
 

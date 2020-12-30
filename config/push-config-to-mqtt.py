@@ -2,6 +2,7 @@ from json import dumps
 import paho.mqtt.client as paho
 import time
 import io
+from datetime import datetime
 
 from yaml import load
 try:
@@ -19,6 +20,10 @@ published = False
 def read_yaml_file(filename):
     with io.open(filename, mode="r", encoding="utf-8") as file:
         config = load(file, Loader=Loader)
+    return config
+
+def add_date(config):
+    config["published"]= datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return config
 
 def to_json(config):
@@ -46,7 +51,7 @@ def connect_and_push():
 
 
 if __name__ == "__main__":
-    data = to_json(read_yaml_file(config_file))
+    data = to_json(add_date(read_yaml_file(config_file)))
     connect_and_push()
     while not published:
         time.sleep(0.1)
