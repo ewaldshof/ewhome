@@ -26,7 +26,7 @@ class Config:
         self.mac = network.mac
         self.data = {}
         self.mine = None
-        self.version = "0.7.0"
+        self.version = "0.8.0"
         self.listeners = []
         self.read_cache()
         if (type(self.mine) is dict and "parts" in self.mine):
