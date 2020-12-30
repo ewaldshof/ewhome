@@ -13,6 +13,7 @@ except:
 
 cachedir = "/cache"
 cachefile = cachedir + "/config.json"
+config_topic_base = "board/"
 
 class Config:
 
@@ -31,7 +32,7 @@ class Config:
         if (type(self.mine) is dict and "parts" in self.mine):
             ct.print_heading("initializing from cache")
             Part.init_parts(board, mqtt, scheduler, self.mine["parts"])
-        mqtt.subscribe("config", self.on_mqtt)
+        mqtt.subscribe(config_topic_base + self.mac + "/config", self.on_mqtt)
 
  
     def read_cache(self):
@@ -56,7 +57,7 @@ class Config:
 
     def set_data(self, data):
         self.data = data
-        self.mine = data.get("esps", {}).get(self.mac, None)
+        self.mine = data
         for listener in self.listeners:
             listener(self)
 
@@ -64,6 +65,9 @@ class Config:
         mine_before = self.mine
         self.set_data(data)
         self.write_cache(data)
+
+        #comparing jsons is not reliable because the ordering of elements can change.
+        #Therefore we just compare the date the config was published
         if (mine_before is None) or (self.mine is None): 
             same_date = False
         else:
@@ -74,7 +78,7 @@ class Config:
             # My config has changed. Reboot.
             sync()
             machine.reset()
-        ct.print_info("Received config with identical date {}".format(self.mine.published))
+        ct.print_info("Received config with identical date {}".format(self.mine["published"]))
 
     def on_update(self, listener):
         self.listeners.append(listener)
