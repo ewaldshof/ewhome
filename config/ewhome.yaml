@@ -1,151 +1,40 @@
 # Konfiguration der einzelnen ESPs: Je nach MAC-Adresse, welche Aufgaben habe ich
 # und welche Peripherie ist mit mir verbunden?
 esps:
-  cc:50:e3:b6:87:b1:
-    name: Testboard von Kolja
+  cc:50:e3:b6:87:b0:
+    name: Kolja Test 2
     parts:
-      assign:
-        test/text: "Config klappt"
-        test/expr1: abs(-cos(0))
-        test/expr2: hex(5) if all((True, True, True)) else 0
-        test/expr3: 0      if all((True, True, False)) else bin(5)
-        test/expr4: chr(97) if any((True, True, False)) else 0
-        test/expr5: 0 if any((False, False, False)) else len((1,2,3))
-        test/expr6: min(max(1,7), 5)
-        test/list:  (5.7, -.2, 18.5, ord('a'))
-        test/expr7: list(map(round, reversed(test/list)))
-        testoutput: 1
-        #test/expr8: "list(filter(lambda x: x>0, test/list))
+      ds18x20:
+        0:
+          period: 5
+          28ffa7aa831704fd: test/temperature
 
-      output_pins:
-        1-1: 1
-        1-3: 1
-        1-5: 1
-        2-1: 1
-        2-3: 1
-        2-5: 1
-        2-7: 1
-
-         
-
-  b4:e6:2d:8f:c8:29:
-    name: Test Tim o. Pins
-  b4:e6:2d:8f:bc:59:
-    te_antriebe:
-      A1.1:
-        - 4_2
-        - 4_3
-        - 4_4
-    ds18b20: 2_1
-    fbh_regler:
-      - A1.1
-
-  30:ae:a4:59:16:f4:
-    name: A1.3 Küche FBH
-    parts:
-      assign:
-        # A/1/3/luft: ds18x20/28ff8e8d83170400["temperature_c"]
-        # A/1/3/vorlauf: ds18x20/28ffd1c5c11604bc["temperature_c"]
-        A/1/3/ruecklauf: |
-          [
-            A/1/3/kreis1,
-            A/1/3/kreis2,
-            A/1/3/kreis3,
-            A/1/3/kreis4,
-            A/1/3/kreis5,
-          ]
-        # NO actuators need a 0 level to heat the room
-        A/1/3/antrieb_status: |
-          [
-            A/1/3/heating_level < 0.3,
-            A/1/3/heating_level < 0.4,
-            A/1/3/heating_level < 0.5,
-            A/1/3/heating_level < 0.6,
-            A/1/3/heating_level < 0.7,
-          ]
       proportional:
-        A/1/3/heating_level:
+        test/heating_level:
           sensor: A/1/3/luft
           midpoint: A/1/3/soll
           spread: 2
-          interval: 60
-      output_pins: 
-        1-1: A/1/3/antrieb_status[0]
-        1-3: A/1/3/antrieb_status[1]
-        1-5: A/1/3/antrieb_status[2]
-        2-1: A/1/3/antrieb_status[3]
-        2-3: A/1/3/antrieb_status[4]
 
-  cc:50:e3:b6:87:b8:
-    name: A1.2 Wohnen FBH
-    parts:
-      assign:
-        # A/1/3/luft: ds18x20/28ff8e8d83170400["temperature_c"]
-        # A/1/3/vorlauf: ds18x20/28ffd1c5c11604bc["temperature_c"]
-        A/1/2/ruecklauf: |
-          [
-            A/1/2/kreis1,
-            A/1/2/kreis2,
-            A/1/2/kreis3,
-            A/1/2/kreis4,
-            A/1/2/kreis5,
-          ]
-        A/1/2/antrieb_status: |
-          [
-            A/1/2/heating_level < 0.3,
-            A/1/2/heating_level < 0.4,
-            A/1/2/heating_level < 0.5,
-            A/1/2/heating_level < 0.6,
-            A/1/2/heating_level < 0.7,
-          ]
-      proportional:
-        A/1/2/heating_level:
-          sensor: A/1/2/luft
-          midpoint: A/1/3/soll
-          spread: 2
-      output_pins:
-        1-1: A/1/2/antrieb_status[0]
-        1-3: A/1/2/antrieb_status[1]
-        1-5: A/1/2/antrieb_status[2]
-        2-1: A/1/2/antrieb_status[3]
-        2-3: A/1/2/antrieb_status[4]
+      slow_pwm:
+        test/slow_pwm:
+          period: 4
+          ratio: 0.2
 
-  b4:e6:2d:8f:c9:51:
-    name: A1.1 Seminar FBH
-    parts:
-      assign:
-        # A/1/1/luft: ds18x20/28ff8e8d83170400["temperature_c"]
-        # A/1/1/vorlauf: ds18x20/28ffd1c5c11604bc["temperature_c"]
-        A/1/1/ruecklauf: |
-          [
-            A/1/1/kreis1,
-            A/1/1/kreis2,
-            A/1/1/kreis3,
-            A/1/1/kreis4,
-            A/1/1/kreis5,
-          ]
-        A/1/1/antrieb_status: |
-          [
-            A/1/1/heating_level < 0.3,
-            A/1/1/heating_level < 0.4,
-            A/1/1/heating_level < 0.5,
-            A/1/1/heating_level < 0.6,
-            A/1/1/heating_level < 0.7,
-          ]
-      proportional:
-        A/1/1/heating_level:
-          sensor: A/1/1/luft
-          midpoint: A/1/1/soll
-          spread: 2
-          interval: 5
+      input_pins:
+        test/in1: 5-1
+        test/in3: 5-3
+        test/in5: 5-5
+        test/in7: 5-7
 
       output_pins:
-        1-1: A/1/1/antrieb_status[0]
-        1-3: A/1/1/antrieb_status[1]
-        1-5: A/1/1/antrieb_status[2]
-        2-1: A/1/1/antrieb_status[3]
-        2-3: A/1/1/antrieb_status[4]
-      
+#        1-1: kolja/slow_pwm
+#        1-3: kolja/slow_pwm
+#        1-5: kolja/slow_pwm
+#        2-1: kolja/slow_pwm
+        2-3: floor( A/1/2/luft ) & 1 
+        2-5: test/slow_pwm
+        2-7: test/in1 | test/in3 | test/in5 | test/in7
+
   cc:50:e3:b6:03:44:
       name: ToBi
       parts:
@@ -179,40 +68,6 @@ esps:
           2-1: not B/1/11/heating_pwm
           2-3: not B/1/11/heating_pwm
           2-5: not B/1/11/heating_pwm
-          
- 
-
-# Mapping der DS18B20-Temperatursensoren auf sprechende Namen.
-ds18x20:
-  # Seminarraum
-  28eef0b71d1601d7: A/1/1/luft
-  28ffa3729017050f: A/1/1/kreis1
-  28ffd88b83170400: A/1/1/kreis2
-  28ff58ae8317043a: A/1/1/kreis3
-  28ffc17cb0160305: A/1/1/kreis4
-  28ff5abe90170571: A/1/1/kreis5
-  28ff9ca790170564: A/1/1/vorlauf
-
-  # Wohnzimmer
-  28ff8339c216042d: A/1/2/luft
-  28ff3482b0160315: A/1/2/kreis6
-  28fff97c90170532: A/1/2/kreis7
-  28ff89ba8317049f: A/1/2/kreis8
-  28ffd4bd83170460: A/1/2/kreis9
-  28ff11dbc11604b3: A/1/2/kreis10
-  28ee18c41d160113: A/1/2/vorlauf
-
-  #Küche
-  28ff8e8d83170400: A/1/3/luft
-  28c5044398ff0091: A/1/3/kreis1
-  28fb1a4398080046: A/1/3/kreis2
-  28220c43980e005e: A/1/3/kreis3
-  28ff810aa7150328: A/1/3/kreis4
-  28ff44ab90170516: A/1/3/kreis5
-  28ffd1c5c11604bc: A/1/3/vorlauf
-
-  #ToBi
-
 
 # configuration der Temperaturanzeige in der App
 raeume:

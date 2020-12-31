@@ -1,4 +1,4 @@
-# ewhome 0.7.0
+# ewhome 0.8.0
 # 
 
 ## Statusanzeige
@@ -7,7 +7,7 @@ Die Boards sind mit 8 Zeilen à 16 Zeichen Monochrom-Displays ausgestattet, di
 
 ```text
 Name d. Boards
-0.7.0
+0.8.0
 
 
 
