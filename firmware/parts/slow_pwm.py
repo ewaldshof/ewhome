@@ -17,8 +17,8 @@ class SlowPwm(Part, Task):
         self.value = True
         self.period = Part.mqtt.subscribe_expression(content.get("period", "60"), self._on_change)
         self.ratio = Part.mqtt.subscribe_expression(content.get("ratio", "0.5"), self._on_change)
-        Part.scheduler.register(self)
         self.update()
+        Part.scheduler.register(self)
 
     def eval_period(self):
         try:
