@@ -21,12 +21,15 @@ class MQTT(Task):
         "/#$": "/.+",
     }
 
+    @classmethod 
+    def prefix(cld, topic, use_prefix = True):
+        return "/".join([MQTT.PREFIX, topic]) if use_prefix else topic
+
     def __init__(self, network):
         super().__init__()
         self.connected = False
         self.callback_called = False
-        self.subscriptions = []
-        self.topics = []
+        self.subscriptions = {}
         self.cache = {}
         self.client = MQTTClient(network.mac, MQTT.SERVER)
         self.client.set_callback(self.callback)
@@ -37,20 +40,26 @@ class MQTT(Task):
         if unjson:
             try:
                 msg = ujson.loads(msg)
-            except:
+            except Exception as e:
                 # Don't pass non-JSON payloads around.
-                print("<!- MQTT {0} non-JSON payload rejected: {1}".format(topic, msg))
+                ct.format_exception(e, "<!- MQTT {0} non-JSON payload rejected: {1}".format(topic, msg))
                 return
-        if not topic.endswith('/config'):
+
+        ct.print_debug("Received MQTT message for {}".format(topic))
+        if topic.endswith('/config'):
             # Config is too large for the memory.
-            print("<-- MQTT {0}: {1}".format(topic, msg))
+            ct.print_debug("<-- MQTT {0}: config".format(topic))
+        else:
+            ct.print_debug("<-- MQTT {0}: {1}".format(topic, msg))
+
         self.cache[topic] = msg
-        for subscription in self.subscriptions:
-            if subscription["re"].match(topic):
-                try:
-                    subscription["callback"](topic, msg)
-                except Exception as e:
-                    print("Callback {0} failed: {1}".format(subscription["topic"], str(e)))
+        subscription = self.subscriptions[topic]
+        for callback in subscription["callbacks"]:
+            try:
+                ct.print_debug("callback")
+                callback(topic, msg)
+            except Exception as e:
+                ct.format_exception(e, "Callback {0} failed: {1}".format(subscription))
 
     def set_connected(self, connected):
         if self.connected != connected:
@@ -62,8 +71,8 @@ class MQTT(Task):
 
     def on_connect(self):
         print("o-o MQTT connected")
-        for topic in self.topics:
-            print("~~~ MQTT subscribe on {0}".format(topic))
+        for topic in self.subscriptions:
+            ct.print_info("~~~ MQTT subscribe on {0}".format(topic))
             try:
                 self.client.subscribe(topic)
             except:
@@ -73,55 +82,45 @@ class MQTT(Task):
         print("-x- MQTT disconnected")
 
     def subscribe(self, topic, callback, use_prefix=True):
-        if use_prefix:
-            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
-        # Build a regex that converts MQTT wildcards to regexes for subscription filtering.
-        regex = topic
-        for (from_re, to) in MQTT.MQTT_TO_REGEX.items():
-            regex = ure.sub(from_re, to, regex)
-        if regex[0] != "^":
-            regex = "^" + regex
-        if regex[-1] != "$":
-            regex = regex + "$"
-        regex_obj = ure.compile(regex)
-        new_subscription = {
-            "topic": topic,
-            "re": regex_obj,
-            "callback": callback,
-        }
-        for subscription in self.subscriptions:
-            identical = new_subscription['topic'] == subscription['topic'] \
-                and new_subscription['callback'] == subscription['callback']
-            if identical:
-                print("Duplicate subscription on {0} for same callback, returning old id {1}".format(
-                    subscription["topic"], subscription["id"]
-                ))
-                return subscription["id"]
-        self.subscriptions.append(new_subscription)
-        new_topic = new_subscription['topic'] not in self.topics
-        if new_topic:
-            self.topics.append(new_subscription['topic'])
-        sub_id = len(self.subscriptions) - 1
-        new_subscription["id"] = sub_id
-        ct.print_info("Added subscription {0} for {1}, regex {2}".format(sub_id, topic, regex))
-        ct.print_debug("con: {}, new: {}".format(self.connected, new_topic))
-        if self.connected and new_topic:
+        topic = MQTT.prefix(topic, use_prefix)
+        
+
+        ct.print_debug("subscribing topic {}".format(topic))
+
+        subscription =  self.subscriptions.get(topic, None)
+
+        # if we allready are subscribed to this, just add another callback
+        if subscription is not None:
+            callbacks = subscription["callbacks"]
+            if callback in callbacks:
+                ct.print_warning("Callback allready exists for this topic, doing nothing")
+            else:
+                ct.print_debug("adding callback to existing subscription {}".format(topic))
+                subscription["callbacks"].append(callback)
+            return subscription
+
+        self.subscriptions[topic] = {"topic": topic, "callbacks": [callback]}
+
+        ct.print_info("Added subscription for {}".format(topic))
+        if self.connected:
             try:
                 print("~~~ MQTT subscribe on {0}".format(topic))
                 self.client.subscribe(topic)
             except Exception as e:
                 ct.format_exception(e, "subscription failed")
                 self.set_connected(False)
-        return sub_id
+        return subscription
 
     def subscribe_expression(self, expression, callback):
         expr = Expression(self, expression)
         expr.subscribe(callback)
         return expr
 
+#    def update_variable(self, topic, ratain=False, use_prefix=True, publish=True):
+
+
     def publish(self, topic, data, retain=False, use_prefix=True):
-        if use_prefix:
-            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
+        topic = MQTT.prefix(topic, use_prefix)
         message = ujson.dumps(data)
         print("-{0}> MQTT {1}{2}: {3}".format(
             "-" if self.connected else " ", topic, " (retain)" if retain else "", message
@@ -138,13 +137,11 @@ class MQTT(Task):
         self.callback(topic.encode("utf-8"), data, unjson=False) # no need to convert JSON back and forth
 
     def get_cached(self, topic, default=None, use_prefix=True):
-        if use_prefix:
-            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
+        topic = MQTT.prefix(topic, use_prefix)
         return self.cache[topic] if topic in self.cache else default
 
     def get_cached_or_raise(self, topic, use_prefix=True):
-        if use_prefix:
-            topic = "{0}/{1}".format(MQTT.PREFIX, topic)
+        topic = MQTT.prefix(topic, use_prefix)
         if topic not in self.cache:
             raise KeyError(topic)
         return self.cache[topic]
