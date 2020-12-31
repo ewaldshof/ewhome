@@ -21,21 +21,25 @@ class MQTT(Task):
         "/#$": "/.+",
     }
 
+    task = None
+
     @classmethod 
     def prefix(cld, topic, use_prefix = True):
         return "/".join([MQTT.PREFIX, topic]) if use_prefix else topic
 
-    def __init__(self, network):
-        super().__init__()
-        self.connected = False
-        self.callback_called = False
-        self.subscriptions = {}
-        self.cache = {}
-        self.client = MQTTClient(network.mac, MQTT.SERVER)
-        self.client.set_callback(self.callback)
+    @classmethod
+    def init(cls, network):
+        cls.task = cls()
+        cls.connected = False
+        cls.callback_called = False
+        cls.subscriptions = {}
+        cls.cache = {}
+        cls.client = MQTTClient(network.mac, MQTT.SERVER)
+        cls.client.set_callback(cls.callback)
 
-    def callback(self, topic, msg, unjson=True):
-        self.callback_called = True
+    @classmethod
+    def callback(cls, topic, msg, unjson=True):
+        cls.callback_called = True
         topic = topic.decode("utf-8")
         if unjson:
             try:
@@ -52,8 +56,8 @@ class MQTT(Task):
         else:
             ct.print_debug("<-- MQTT {0}: {1}".format(topic, msg))
 
-        self.cache[topic] = msg
-        subscription = self.subscriptions[topic]
+        cls.cache[topic] = msg
+        subscription = cls.subscriptions[topic]
         for callback in subscription["callbacks"]:
             try:
                 ct.print_debug("callback")
@@ -61,33 +65,37 @@ class MQTT(Task):
             except Exception as e:
                 ct.format_exception(e, "Callback {0} failed: {1}".format(subscription))
 
-    def set_connected(self, connected):
-        if self.connected != connected:
-            self.connected = connected
-            if self.connected:
-                self.on_connect()
+    @classmethod
+    def set_connected(cls, connected):
+        if cls.connected != connected:
+            cls.connected = connected
+            if cls.connected:
+                cls.on_connect()
             else:
-                self.on_disconnect()
+                cls.on_disconnect()
 
-    def on_connect(self):
+    @classmethod
+    def on_connect(cls):
         print("o-o MQTT connected")
-        for topic in self.subscriptions:
+        for topic in cls.subscriptions:
             ct.print_info("~~~ MQTT subscribe on {0}".format(topic))
             try:
-                self.client.subscribe(topic)
+                cls.client.subscribe(topic)
             except:
-                self.set_connected(False)
+                cls.set_connected(False)
 
-    def on_disconnect(self):
+    @classmethod
+    def on_disconnect(cls):
         print("-x- MQTT disconnected")
 
-    def subscribe(self, topic, callback, use_prefix=True):
+    @classmethod
+    def subscribe(cls, topic, callback, use_prefix=True):
         topic = MQTT.prefix(topic, use_prefix)
         
 
         ct.print_debug("subscribing topic {}".format(topic))
 
-        subscription =  self.subscriptions.get(topic, None)
+        subscription =  cls.subscriptions.get(topic, None)
 
         # if we allready are subscribed to this, just add another callback
         if subscription is not None:
@@ -99,77 +107,85 @@ class MQTT(Task):
                 subscription["callbacks"].append(callback)
             return subscription
 
-        self.subscriptions[topic] = {"topic": topic, "callbacks": [callback]}
+        cls.subscriptions[topic] = {"topic": topic, "callbacks": [callback]}
 
         ct.print_info("Added subscription for {}".format(topic))
-        if self.connected:
+        if cls.connected:
             try:
                 print("~~~ MQTT subscribe on {0}".format(topic))
-                self.client.subscribe(topic)
+                cls.client.subscribe(topic)
             except Exception as e:
                 ct.format_exception(e, "subscription failed")
-                self.set_connected(False)
+                cls.set_connected(False)
         return subscription
 
-    def subscribe_expression(self, expression, callback):
-        expr = Expression(self, expression)
+    @classmethod
+    def subscribe_expression(cls, expression, callback):
+        ct.print_debug("Checkpoint MQTT 0")
+        expr = Expression(expression)
+        ct.print_debug(expr)
+        ct.print_debug("Checkpoint MQTT 1")
         expr.subscribe(callback)
+        ct.print_debug("Checkpoint MQTT 2")
         return expr
 
 #    def update_variable(self, topic, ratain=False, use_prefix=True, publish=True):
 
 
-    def publish(self, topic, data, retain=False, use_prefix=True):
-        topic = MQTT.prefix(topic, use_prefix)
+    @classmethod
+    def publish(cls, topic, data, retain=False, use_prefix=True):
+        topic = cls.prefix(topic, use_prefix)
         message = ujson.dumps(data)
         print("-{0}> MQTT {1}{2}: {3}".format(
-            "-" if self.connected else " ", topic, " (retain)" if retain else "", message
+            "-" if cls.connected else " ", topic, " (retain)" if retain else "", message
         ))
         if retain:
-            self.cache[topic] = data
-        if self.connected:
+            cls.cache[topic] = data
+        if cls.connected:
             try:
-                self.client.publish(topic, message, retain)
+                cls.client.publish(topic, message, retain)
                 return
             except:
-                self.set_connected(False)
+                cls.set_connected(False)
         # At this point, the message was not sent and we are probably disconnected. Deliver locally.
-        self.callback(topic.encode("utf-8"), data, unjson=False) # no need to convert JSON back and forth
+        cls.callback(topic.encode("utf-8"), data, unjson=False) # no need to convert JSON back and forth
 
-    def get_cached(self, topic, default=None, use_prefix=True):
+    @classmethod
+    def get_cached(cls, topic, default=None, use_prefix=True):
         topic = MQTT.prefix(topic, use_prefix)
-        return self.cache[topic] if topic in self.cache else default
+        return cls.cache[topic] if topic in cls.cache else default
 
-    def get_cached_or_raise(self, topic, use_prefix=True):
+    @classmethod
+    def get_cached_or_raise(cls, topic, use_prefix=True):
         topic = MQTT.prefix(topic, use_prefix)
-        if topic not in self.cache:
+        if topic not in cls.cache:
             raise KeyError(topic)
-        return self.cache[topic]
+        return cls.cache[topic]
+
 
     def update(self, scheduler):
-        if not self.connected:
+        if not MQTT.connected:
             try:
-                self.client.connect()
-                self.set_connected(True)
+                MQTT.client.connect()
+                MQTT.set_connected(True)
             except:
                 pass
         else:
-            self.callback_called = False
+            MQTT.callback_called = False
             try:
                 while True:
-                    self.client.check_msg()
-                    if not self.callback_called:
+                    MQTT.client.check_msg()
+                    if not MQTT.callback_called:
                         break
-                    self.callback_called = False
-                self.callback_called = False
+                    MQTT.callback_called = False
+                MQTT.callback_called = False
             except:
-                self.set_connected(False)
+                MQTT.set_connected(False)
 
 
 class Expression:
 
-    def __init__(self, mqtt, expression):
-        self.mqtt = mqtt
+    def __init__(self, expression):
         self.topics = []
         expression = str(expression)
         self.expression = expression
@@ -200,7 +216,7 @@ class Expression:
             "randint" : random.randint,
             "uniform" : random.uniform,
             "time"    : utime.time,  #only available in micropython
-            "mqtt_get_value": mqtt.get_cached_or_raise,
+            "mqtt_get_value": MQTT.get_cached_or_raise,
         }
         self._analyze(expression)
         self.topics = list(set(self.topics))  # remove duplicates
@@ -253,4 +269,4 @@ class Expression:
     def subscribe(self, callback):
         self.callback = callback
         for topic in self.topics:
-            self.mqtt.subscribe(topic, self._on_mqtt)
+            MQTT.subscribe(topic, self._on_mqtt)

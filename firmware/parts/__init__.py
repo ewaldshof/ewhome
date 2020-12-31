@@ -15,18 +15,23 @@
 # - content is the whole config assigned to the identifier. This might be a single string for some parts or a dictionary for others
 from task import Task
 from color_text import ColorText as ct 
-
+from mqtt import MQTT
 
 class Part:
-
     #services are identical over all parts
     @staticmethod   
-    def setup_services(board, mqtt, scheduler):
+    def setup_services(board, scheduler):
         Part.board = board
-        Part.mqtt = mqtt
         Part.scheduler = scheduler
 
 
+    @classmethod
+    def publish(cls, topic, value, retain = True):
+        MQTT.publish(topic, value, retain)
+
+    @classmethod
+    def subscribe_expression(cls, expression, callback):
+        return MQTT.subscribe_expression(expression, callback)
 
     @classmethod
     def boot(cls, config):
@@ -39,12 +44,11 @@ class Part:
     initialized = False
 
     @classmethod
-    def init_parts(cls, board, mqtt, scheduler, part_config):
+    def init_parts(cls, board, scheduler, part_config):
         if Part.initialized:
             return
         Part.initialized = True
         Part.board = board
-        Part.mqtt = mqtt
         Part.scheduler = scheduler
 
         for partname, partconfig in part_config.items():

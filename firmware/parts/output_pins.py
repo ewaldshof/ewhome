@@ -14,7 +14,7 @@ class OutputPins(Part):
      
         self.name = key 
         self.pin = Part.board.get_pin(self.name)
-        self.expression = Part.mqtt.subscribe_expression(content, self._on_change)
+        self.expression = Part.subscribe_expression(content, self._on_change)
         try:
             self.pin(bool(self.expression.evaluate()))
         except:

@@ -55,7 +55,7 @@ class Ds18x20(FixedPeriodPart):
                 ct.print_debug("reading temperatures from {} for {}".format(sensor.hex_address(), sensor.topic))
                 try:
                     temperature = self.ds.read_temp(sensor.address)
-                    Part.mqtt.publish(sensor.topic, temperature, retain=True)
+                    Part.publish(sensor.topic, temperature, retain=True)
                 except Exception as e:
                     ct.format_exception(e, "Exception in ds18x20 update for {}".format(sensor.topic))
             # Reset our update interval to the configured one, minus convert time.

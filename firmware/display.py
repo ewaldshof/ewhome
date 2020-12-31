@@ -1,13 +1,13 @@
 from task import Task
+from mqtt import MQTT
 
 class Display(Task):
 
-    def __init__(self, driver, network, mqtt):
+    def __init__(self, driver, network):
         super().__init__()
         self.driver = driver
         self.lines = [""] * 6
         self.network = network
-        self.mqtt = mqtt
         self.mac = network.mac.split(":")
         self.blip = True
         self.mqtt_status = None
@@ -45,7 +45,7 @@ class Display(Task):
             self.driver.text(self.mac[byte], 22 * byte + 1, 49)
 
         # Status bar.
-        if self.mqtt.connected:
+        if MQTT.connected:
             self.driver.text("M", 0, 57)
         self.driver.text("WL " + self.network.wlan_msg, 16, 57)
         self.driver.text("<3", 113, 57, int(self.blip))
@@ -55,7 +55,7 @@ class Display(Task):
 
 
     def update(self, scheduler):
-        mqtt_status = "M" if (self.mqtt is not None and self.mqtt.connected) else " "
+        mqtt_status = "M" if MQTT.connected else " "
         wlan_status = ("WL " + self.network.wlan_msg) if (self.network is not None) else "WL?"
 
         if mqtt_status != self.mqtt_status or wlan_status != self.wlan_status:

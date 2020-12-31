@@ -4,6 +4,7 @@ import ujson
 from parts import Part
 from uos import mkdir
 from color_text import ColorText as ct
+from mqtt import MQTT
 
 try: # Some boards have a sync() call for filesystem sync, others don't.
     from uos import sync
@@ -18,8 +19,7 @@ config_topic_base = "board/"
 class Config:
 
 
-    def __init__(self, board, network, mqtt, scheduler):
-        self.mqtt = mqtt
+    def __init__(self, board, network, scheduler):
         self.board = board
         self.scheduler = scheduler
         self.parts_initialized = False
@@ -31,8 +31,8 @@ class Config:
         self.read_cache()
         if (type(self.mine) is dict and "parts" in self.mine):
             ct.print_heading("initializing from cache")
-            Part.init_parts(board, mqtt, scheduler, self.mine["parts"])
-        mqtt.subscribe(config_topic_base + self.mac + "/config", self.on_mqtt)
+            Part.init_parts(board, scheduler, self.mine["parts"])
+        MQTT.subscribe(config_topic_base + self.mac + "/config", self.on_mqtt)
 
  
     def read_cache(self):

@@ -8,22 +8,22 @@ from mqtt import MQTT
 from task import Scheduler
 
 network = Network()
-mqtt = MQTT(network)
+MQTT.init(network)
 
-board = Board(network, mqtt)
+board = Board(network)
 board.init()
 
 heartbeat = Heartbeat(board.display)
 
 scheduler = Scheduler()
 
-config = Config(board, network, mqtt, scheduler)
+config = Config(board, network, scheduler)
 
 name = Name(config, board.display) 
 scheduler.register(board.display)
 scheduler.register(heartbeat)
 scheduler.register(network)
-scheduler.register(mqtt)
+scheduler.register(MQTT.task)
 
 print("Starting scheduler of version {0}".format(config.version))
 

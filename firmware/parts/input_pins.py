@@ -26,4 +26,4 @@ class InputPins(Part):
  
     def _on_change(self, pin):
         # TODO: Debouncing.
-        self.mqtt.publish(self.topic, bool(pin()))
+        Part.publish(self.topic, bool(pin()))

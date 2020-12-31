@@ -22,9 +22,9 @@ class Proportional(FixedPeriodPart):
         ct.print_debug("content {}".format(content))
 
         assert {"sensor"}.issubset(content), str(ct.ColorText("parameter missing from proportional {}".format(key)).error())
-        self.sensor = Part.mqtt.subscribe_expression(content["sensor"], self._on_change)
-        self.midpoint = Part.mqtt.subscribe_expression(content.get("midpoint", "20"), self._on_change)
-        self.spread = Part.mqtt.subscribe_expression(content.get("spread", "2"), self._on_change)
+        self.sensor = Part.subscribe_expression(content["sensor"], self._on_change)
+        self.midpoint = Part.subscribe_expression(content.get("midpoint", "20"), self._on_change)
+        self.spread = Part.subscribe_expression(content.get("spread", "2"), self._on_change)
         self.schedule_period_from_dict(content)
  
     def update(self, scheduler):
@@ -38,7 +38,7 @@ class Proportional(FixedPeriodPart):
             result = min(1.0, max(0.0, result))
         except:
             pass
-        Part.mqtt.publish(self.topic, result, retain=True)
+        Part.publish(self.topic, result, retain=True)
 
     def _on_change(self, expression, value):
         pass
