@@ -35,7 +35,7 @@ esps:
         2-5: test/slow_pwm
         2-7: test/in1 | test/in3 | test/in5 | test/in7
 
-  cc:50:e3:b6:03:44:
+  cc:50:e3:b6:83:44:
       name: ToBi
       parts:
         proportional:
