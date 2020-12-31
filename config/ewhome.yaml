@@ -35,40 +35,39 @@ esps:
         2-5: test/slow_pwm
         2-7: test/in1 | test/in3 | test/in5 | test/in7
 
-  cc:50:e3:b6:03:44:
-    name: ToBi
-    parts:
-      proportional:
-        B/1/11/heating_level:
-          sensor: B/1/11/luft
-          midpoint: B/1/11/soll
-          spread: 2
-          interval: 60
-     
-      ds18x20:
-        4-1:
-          28250a43980f0083: B/1/11/luft
-          #room names below are not correct 
-          28c5044398ff0091: B/1/11/kreis1
-          28fb1a4398080046: B/1/11/kreis2
-          28220c43980e005e: B/1/11/kreis3
-          28ff810aa7150328: B/1/11/kreis4
-          28ff44ab90170516: B/1/11/kreis5
-          28ffd1c5c11604bc: B/1/11/vorlauf
+  cc:50:e3:b6:83:44:
+      name: ToBi
+      parts:
+        proportional:
+          B/1/11/heating_level:
+            sensor: B/1/11/luft
+            midpoint: B/1/11/soll
+            spread: 2
+            interval: 60
       
-      slow_pwm:
-        B/1/11/heating_pwm:
-          period: 240
-          ratio: B/1/11/heating_level 
-
-      output_pins:
-        1-1: not B/1/11/heating_pwm
-        1-3: not B/1/11/heating_pwm
-        1-5: not B/1/11/heating_pwm
-        2-1: not B/1/11/heating_pwm
-        2-3: not B/1/11/heating_pwm
-        2-5: not B/1/11/heating_pwm
-
+        ds18x20:
+          4-1:
+            28250a43980f0083: B/1/11/luft
+            #room names below are not correct 
+            28c5044398ff0091: B/1/11/kreis1
+            28fb1a4398080046: B/1/11/kreis2
+            28220c43980e005e: B/1/11/kreis3
+            28ff810aa7150328: B/1/11/kreis4
+            28ff44ab90170516: B/1/11/kreis5
+            28ffd1c5c11604bc: B/1/11/vorlauf
+        
+        slow_pwm:
+          B/1/11/heating_pwm:
+            period: 240
+            ratio: B/1/11/heating_level 
+            
+        output_pins:
+          1-1: not B/1/11/heating_pwm
+          1-3: not B/1/11/heating_pwm
+          1-5: not B/1/11/heating_pwm
+          2-1: not B/1/11/heating_pwm
+          2-3: not B/1/11/heating_pwm
+          2-5: not B/1/11/heating_pwm
 
 # configuration der Temperaturanzeige in der App
 raeume:
@@ -87,5 +86,8 @@ raeume:
   A/1/3:
     name:       "Küche"
     fbh_kreise: 5
+  B/1/11:
+    name:       "ToBi"
+    fbh_kreise: 6
   
      

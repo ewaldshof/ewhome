@@ -17,6 +17,7 @@ class SlowPwm(FixedPeriodPart):
         self.schedule_period_from_dict(content)
         self.ratio = Part.subscribe_expression(content.get("ratio", "0.5"), self._on_change)
         self.update()
+        Part.scheduler.register(self)
 
 
     def eval_period(self):
