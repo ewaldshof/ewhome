@@ -3,6 +3,7 @@ import paho.mqtt.client as paho
 import time
 import io
 from datetime import datetime
+import sys 
 
 from yaml import load
 try:
@@ -11,7 +12,8 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
-config_file = "ewhome.yaml"
+config_file = "ewhome.yaml" if len(sys.argv) < 2 else sys.argv[1]
+
 broker_address = "10.0.0.88"
 topic_conf_complete = "ewhome/config"
 topic_base = "ewhome/"
@@ -50,7 +52,8 @@ def on_connect(client, userdata, flags, rc):
         publish_as_json(client, "board/"+key+"/config", value)
 
     # and also publish room data
-    publish_as_json(client, "app/rooms", yaml_config["raeume"], False)
+    if "raeume" in yaml_config:
+        publish_as_json(client, "app/rooms", yaml_config["raeume"], False)
 
     global all_published
     all_published = True
