@@ -13,14 +13,15 @@ class SlowPwm(FixedPeriodPart):
 
     def __init__(self, key, content):
         self.topic = key
-        self.value = True
+        self.value = False
         self.schedule_period_from_dict(content)
+        self.current_ratio = 0.5
         self.ratio = Part.subscribe_expression(content.get("ratio", "0.5"), self._on_change)
         self.update()
         Part.scheduler.register(self)
 
 
-    def eval_period(self):
+    def eval(self):
         try:
             self.current_ratio = self.ratio.evaluate()
         except Exception as e:
@@ -30,12 +31,16 @@ class SlowPwm(FixedPeriodPart):
             self.current_ratio = 0.5
 
     def update(self, scheduler=None):
-        if self.value:
-            self.eval_period()
-            self.countdown = self.interval = 1000 * self.period * (1-self.current_ratio)
-        else:
-            self.countdown = self.interval = 1000 * self.period * self.current_ratio
-        self.value = not self.value
+        old_ratio = self.current_ratio
+        self.eval()
+        # in extreme cases we set the output to a constant value
+        if self.current_ratio < 0.0001 or self.current_ratio > 0.9999:
+            self.value = self.current_ratio > 0.5
+            phase_ratio = 1.0
+        else: #otherwise toggle
+            self.value = not self.value
+            phase_ratio = self.current_ratio if self.value else 1-old_ratio
+        self.countdown = self.interval = 1000 * self.period * phase_ratio
         Part.publish(self.topic, self.value, retain=True)
 
     def _on_change(self, expression, value):
