@@ -3,9 +3,8 @@ from components import Component, Signal
 
 
 yaml_string1  = """
-schmitt_trigger:
-    trigger1:
-        input: in1 + abs(in2)
+assign:
+    sumabs: in1 + abs(in2)    
 """
 yaml_string2  = """
 proportional:

@@ -96,6 +96,7 @@ class Component():
     # create a netlist of components ant signals from a config dict 
     @classmethod
     def netlist_from_config(cls, config):
+
         for compname, compconfig in config.items():
             modname = "components." + compname
             classname = "".join(word[0].upper() + word[1:] for word in compname.split("_"))
@@ -153,7 +154,8 @@ class Component():
     def __str__(self):
         s = ""
         for key, value in self.__dict__.items():
-            s += "{:>15} : {}\n".format(key, str(value))
+            if key != "expr_locals": #special case for Expression subclass
+                s += "{:>15} : {}\n".format(key, str(value))
         return s 
 
 # a sginal passes a value change initiated by its source to all of its fanout components
@@ -164,7 +166,6 @@ class Signal():
 
     by_name = {}
 
-    name_re = ure.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 
     @classmethod
     def constant(cls, value, used_by=None, port=None):
@@ -190,7 +191,7 @@ class Signal():
             ct.print_debug("creating constant")
             return cls.constant(input_string, component)
 
-        match = cls.name_re.match(input_string)
+        match = Expression.name_re.match(input_string)
 
         # a simple case is a direct assignment of a signal
         if match.end() == len(input_string):
@@ -201,7 +202,7 @@ class Signal():
 
         #otherwise we create an Expression component
         signal_name = ("_".join((component.name, port)))
-        expr = Expression(signal_name, input_string, match)
+        expr = Expression(signal_name, input_string)
         Component.by_name[signal_name] = expr
         return expr.output
 
@@ -249,9 +250,11 @@ class Signal():
     def add_fanout(self, component):
         self.fanouts.add(component)
 
-    
 
 class Expression(Component):
+
+    name_re = ure.compile(r'[A-Za-z_][A-Za-z0-9_]*')
+
     expr_globals = {
             "dew"  : None, #self._dewpoint,
             "min"  : min,
@@ -282,23 +285,28 @@ class Expression(Component):
         }
 
     reserved_names = {"name", "expr_locals", "python", "output"}
-    def __init__(self, result_name, expression_string, matches):
-        self.name = result_name 
 
+
+    def __init__(self, result_name, expression_string):
+        self.name = result_name 
+        matches = Expression.name_re.match(expression_string)
         self.expr_locals = {}
-        self.python = Signal.name_re.sub(self._replace_in_expr, expression_string)
+        self.python = Expression.name_re.sub(self._replace_in_expr, expression_string)
         ct.print_info("Expression = {}".format(self.python))
         out = Signal.get_by_name(result_name, self)
         setattr(self, "output", out)
 
     def eval(self):
-        ct.print_debug("evaluating {}".format(self.name))
-        self.output = eval(self.python, self.expr_globals, self.expr_locals)
+        self.output.value = eval(self.python, self.expr_globals, self.expr_locals)
+        ct.print_debug("evaluating {} to {}".format(self.name, self.output.value))
 
 
     def _replace_in_expr(self, match):        
         name = match.group(0)
-        assert name not in Expression.expr_globals, "global function names can't be used in expressions: {}".format(name)
+        ct.print_debug("processing match {}".format(name))
+        if  name in Expression.expr_globals:
+            ct.print_debug("ignoring global function name: {}".format(name))
+            return name
         assert name not in Expression.reserved_names, "reserved names can't be used in expressions: {}".format(name)
 
         sig = Signal.get_by_name(name, None)
@@ -307,3 +315,13 @@ class Expression(Component):
         self.expr_locals[name] =  sig
         return '{}.value'.format(name)
 
+    def format_expr_locals(self):
+        s = ""
+        for key, value in self.expr_locals.items():
+            s += "{:>20} : {}\n".format(key, str(value.name))
+        return s 
+
+    @classmethod
+    def is_simple_asssignment(string):
+        pass
+    
