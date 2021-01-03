@@ -21,11 +21,11 @@ class Proportional(Component):
     }
 
     outputs = {
-        "out":   (None, None, None)
+        "output":   (None, None, None)
     }
 
     def eval(self):
         print(str(self))
         diff = self.midpoint.value - self.sensor.value
         result = 0.5 + (diff / self.spread.value)
-        self.out.value = min(1.0, max(0.0, result))
+        self.output.value = min(1.0, max(0.0, result))

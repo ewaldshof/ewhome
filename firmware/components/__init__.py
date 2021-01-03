@@ -21,7 +21,7 @@ class Component():
     # the entries are tuples (default, min, max)
     # if min or max is None it will not be checked
     # if default is none the input is consiered to be a mandatory input
-    # single line components must use "in" as input name
+    # single line components must use "input" as input name
     inputs = {}
 
    # same for parameters, these can't be changed after initialisation
@@ -35,40 +35,39 @@ class Component():
     def __init__(self, key, config):
         ct.print_info("New {} named {} initialised with {}".format(type(self).__name__, key, config))
         self.name = key
-
-        # init name of the component
-        # default implementation creates an output out connected to a signal with the configured name, driven by this component
-        self.init_name(key, config)
  
         if isinstance(config, str):
-            #initialize single line component from str
-            self.init_single_line(config)
-        else:
-            assert type(config) == dict, "config of a component must either be str or dict"
-            #initialize multi line components from config dictionary
-            # create signals or constants for inputs, adds self to fanout
-            ct.print_debug("Initializing Inputs")
-            self.init_ports_from_dict(config, type(self).inputs, Signal.create_by_input_string)
-            # create constants for parameter, adds self to fantout
-            ct.print_debug("Initializing Params")
-            self.init_ports_from_dict(config, type(self).params, Signal.constant)
-            #create additional outputs, sets self as source
-            ct.print_debug("Initializing Outputs")
-            self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name)
+            #initialize single line component from str by converting it into a multi line component
+            ct.print_debug("Converting from single line to multi line Component")
+            config = {"input": config}
 
-            # when done there should be no connections left in configuration
-            assert len(config) == 0, "unmatched connections".format(config)
+        assert type(config) == dict, "config of a component must either be str or dict"
+
+        # init name of the component
+        # default implementation creates "output" connected to a signal with the configured name, driven by this component
+        self.init_name(key, config)
+ 
+
+        #initialize multi line components from config dictionary
+        # create signals or constants for inputs, adds self to fanout
+        ct.print_debug("Initializing Inputs")
+        self.init_ports_from_dict(config, type(self).inputs, Signal.create_by_input_string)
+        # create constants for parameter, adds self to fantout
+        ct.print_debug("Initializing Params")
+        self.init_ports_from_dict(config, type(self).params, Signal.constant)
+        #create additional outputs, sets self as source
+        ct.print_debug("Initializing Outputs")
+        self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name)
+
+        # when done there should be no connections left in configuration
+        assert len(config) == 0, "unmatched connections".format(config)
 
     #default implementation assumes name of component specifies an output signal, can be overwritten
     def init_name(self, name, config):
         ct.print_debug("Default implementation creates output {} for {}".format(name, type(self)))
-        config["out"] = name
+        config["output"] = name
         #self.out = Signal.get_by_name(name, self)
 
-    #default implementation assumes signal, can be overwritten for params
-    def init_single_line(self, config):
-        ct.print_debug("Default implementation creates input {} from single line for {}".format(config, type(self)))
-        self.init_ports_from_dict({"in": config}, type(self).inputs, Signal.create_by_input_string)
 
     def init_ports_from_dict(self, config, names_and_constraints, signal_creation_method):
         for name  in names_and_constraints:
@@ -79,7 +78,7 @@ class Component():
                 assert default is not None, "mandatory port {} missing".format(name)
                 sig = Signal.constant(default, self)
             else:
-                sig = signal_creation_method(line_config, self)
+                sig = signal_creation_method(line_config, self, name)
             setattr(self, name, sig) 
     
 
@@ -168,14 +167,14 @@ class Signal():
     name_re = ure.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 
     @classmethod
-    def constant(cls, value, used_by=None):
+    def constant(cls, value, used_by=None, port=None):
         sig = cls.get_by_name("const_"+str(value))
         sig.__value = value
         sig.add_fanout(used_by)
         return sig
 
     @classmethod
-    def get_by_name(cls, name, source=None):
+    def get_by_name(cls, name, source=None, port=None):
         if name in Signal.by_name:
             return Signal.by_name[name]
         else:
@@ -185,22 +184,26 @@ class Signal():
     #analyze an input string to decide what type of signal to use
     #this is intended for the right hand side strings of the instantiation
     @classmethod
-    def create_by_input_string(cls, name, component):
-        ct.print_debug("analyzing signal assignment {} of type {}".format(name, type(name)))
-        if not isinstance(name, str):
+    def create_by_input_string(cls, input_string, component, port):
+        ct.print_debug("analyzing signal assignment {} of type {}".format(input_string, type(input_string)))
+        if not isinstance(input_string, str):
             ct.print_debug("creating constant")
-            return cls.constant(name, component)
+            return cls.constant(input_string, component)
 
-        match = cls.name_re.match(name)
+        match = cls.name_re.match(input_string)
 
         # a simple case is a direct assignment of a signal
-        if match.end() == len(name):
+        if match.end() == len(input_string):
             ct.print_debug("direct assignment")
-            sig = cls.get_by_name(name)
+            sig = cls.get_by_name(input_string)
             sig.add_fanout(component)
             return sig
 
         #otherwise we create an Expression component
+        signal_name = ("_".join((component.name, port)))
+        expr = Expression(signal_name, input_string, match)
+        Component.by_name[signal_name] = expr
+        return expr.output
 
     @classmethod
     def set_by_name(cls, name, value):
@@ -225,6 +228,7 @@ class Signal():
 
     def __setValue(self, val):
         # no change, no None
+        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
         if self.last_value == val:
             return 
 
@@ -248,7 +252,7 @@ class Signal():
     
 
 class Expression(Component):
-     expr_globals = {
+    expr_globals = {
             "dew"  : None, #self._dewpoint,
             "min"  : min,
             "max"  : max,
@@ -276,3 +280,30 @@ class Expression(Component):
             "time"    : utime.time,  #only available in micropython
             "mqtt_get_value": None #MQTT.get_cached_or_raise,
         }
+
+    reserved_names = {"name", "expr_locals", "python", "output"}
+    def __init__(self, result_name, expression_string, matches):
+        self.name = result_name 
+
+        self.expr_locals = {}
+        self.python = Signal.name_re.sub(self._replace_in_expr, expression_string)
+        ct.print_info("Expression = {}".format(self.python))
+        out = Signal.get_by_name(result_name, self)
+        setattr(self, "output", out)
+
+    def eval(self):
+        ct.print_debug("evaluating {}".format(self.name))
+        self.output = eval(self.python, self.expr_globals, self.expr_locals)
+
+
+    def _replace_in_expr(self, match):        
+        name = match.group(0)
+        assert name not in Expression.expr_globals, "global function names can't be used in expressions: {}".format(name)
+        assert name not in Expression.reserved_names, "reserved names can't be used in expressions: {}".format(name)
+
+        sig = Signal.get_by_name(name, None)
+        sig.add_fanout(self)
+        setattr(self, name, sig)
+        self.expr_locals[name] =  sig
+        return '{}.value'.format(name)
+

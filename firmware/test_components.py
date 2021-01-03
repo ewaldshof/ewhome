@@ -2,10 +2,15 @@ import yaml
 from components import Component, Signal
 
 
-yaml_string  = """
+yaml_string1  = """
+schmitt_trigger:
+    trigger1:
+        input: in1 + in2
+"""
+yaml_string2  = """
 proportional:
     first_prop:
-        sensor: sensor_input
+        sensor: sensor_intput
         midpoint: 20
         spread: 2
     second_prop:
@@ -14,13 +19,13 @@ proportional:
         spread: 2
        
 """
-print(yaml_string)
-config = yaml.safe_load(yaml_string)
-
-p = config["proportional"]
-print(type(p["first_prop"]))
-
+print(yaml_string1)
+config = yaml.safe_load(yaml_string1)
 Component.netlist_from_config(config)
 Component.print_netlist()
-Signal.set_by_name("sensor_input", 20.5)
+print("update")
+Signal.set_by_name("in1", 7.5)
+Signal.set_by_name("in2", 3)
 Component.print_netlist()
+#Signal.set_by_name("trigger_input", 0.5)
+#Component.print_netlist()
