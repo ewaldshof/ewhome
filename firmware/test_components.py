@@ -5,7 +5,7 @@ from components import Component, Signal
 yaml_string1  = """
 schmitt_trigger:
     trigger1:
-        input: in1 + in2
+        input: in1 + abs(in2)
 """
 yaml_string2  = """
 proportional:
@@ -25,7 +25,7 @@ Component.netlist_from_config(config)
 Component.print_netlist()
 print("update")
 Signal.set_by_name("in1", 7.5)
-Signal.set_by_name("in2", 3)
+Signal.set_by_name("in2", -3)
 Component.print_netlist()
 #Signal.set_by_name("trigger_input", 0.5)
 #Component.print_netlist()
