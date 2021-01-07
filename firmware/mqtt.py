@@ -148,7 +148,7 @@ class MQTT(Task):
             except:
                 cls.set_connected(False)
         # At this point, the message was not sent and we are probably disconnected. Deliver locally.
-        cls.callback(topic.encode("utf-8"), data, unjson=False) # no need to convert JSON back and forth
+        #cls.callback(topic.encode("utf-8"), data, unjson=False) # no need to convert JSON back and forth
 
     @classmethod
     def get_cached(cls, topic, default=None, use_prefix=True):

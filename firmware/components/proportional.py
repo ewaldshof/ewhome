@@ -5,11 +5,15 @@
 # useful for pid controllers
 # Example configuration:
 #
-#   A1.1/heating:
-#     sensor: A1.1/luft
+#   A1_1_heating:
+#     sensor: A1_1_luft
 #     midpoint: 21 #in °C
 #     spread: 2
 #     interval: 60
+#
+# this is equivalten to:
+# assign:
+#     A1_1_heating: min(1.0, max(0.0, 0.5 + (21-A1_1_luft)/2))
 
 from components import Component, Signal
 class Proportional(Component):

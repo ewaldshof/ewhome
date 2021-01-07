@@ -4,7 +4,7 @@ class SchmittTrigger(Component):
     inputs = {
         "threshold":    (0.5, 0.0001, 0.0009),
         "hysteresis":   (0.2, 0, 0.49),
-        "input":           (0, None, None)
+        "input":          (0, None, None)
     }
 
     outputs = {

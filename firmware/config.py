@@ -2,6 +2,7 @@ import errno
 import machine
 import ujson
 from parts import Part
+from components import Component
 from uos import mkdir
 from color_text import ColorText as ct
 from mqtt import MQTT
@@ -29,9 +30,15 @@ class Config:
         self.version = "0.8.0"
         self.listeners = []
         self.read_cache()
-        if (type(self.mine) is dict and "parts" in self.mine):
+#        if (type(self.mine) is dict and "parts" in self.mine):
+#            ct.print_heading("initializing from cache")
+#            Part.init_parts(board, scheduler, self.mine["parts"])
+
+        Component.setup_services(board, scheduler)
+        if (type(self.mine) is dict and "components" in self.mine):
             ct.print_heading("initializing from cache")
-            Part.init_parts(board, scheduler, self.mine["parts"])
+            Component.netlist_from_config(self.mine["components"])
+            Component.print_netlist()
         MQTT.subscribe(config_topic_base + self.mac + "/config", self.on_mqtt)
 
  

@@ -5,7 +5,7 @@
 # This implementation currently only allows for one gloabel netlist that is stored as a class variable.
 
 from color_text import ColorText as ct
-import re as ure
+import ure as ure
 import time as utime
 #import ure
 #import utime
@@ -36,16 +36,14 @@ class Component():
         ct.print_info("New {} named {} initialised with {}".format(type(self).__name__, key, config))
         self.name = key
  
-        if isinstance(config, str):
+        if not isinstance(config, dict):
             #initialize single line component from str by converting it into a multi line component
             ct.print_debug("Converting from single line to multi line Component")
             config = {"input": config}
 
-        assert type(config) == dict, "config of a component must either be str or dict"
-
         # init name of the component
         # default implementation creates "output" connected to a signal with the configured name, driven by this component
-        self.init_name(key, config)
+        self.init_name(config)
  
 
         #initialize multi line components from config dictionary
@@ -54,18 +52,37 @@ class Component():
         self.init_ports_from_dict(config, type(self).inputs, Signal.create_by_input_string)
         # create constants for parameter, adds self to fantout
         ct.print_debug("Initializing Params")
-        self.init_ports_from_dict(config, type(self).params, Signal.constant)
+        self.init_ports_from_dict(config, type(self).params, type(self).init_param)
         #create additional outputs, sets self as source
         ct.print_debug("Initializing Outputs")
         self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name)
 
         # when done there should be no connections left in configuration
         assert len(config) == 0, "unmatched connections".format(config)
+        self.post_init()
+
+    # this is call during netlist creation directly after __init__
+    def post_init(self):
+        pass
+
+    #default behhaviour for params is to make them a constant signal
+    # maybe we can reorder the paarmeters of the singnal_creation_methode to make this a mamber function
+    @classmethod
+    def init_param(cls, value, component, param_name):
+        Signal.constant(value, self2, name)
+
+    @classmethod
+    def constant(cls, value, used_by=None, port=None):
+        sig = cls.get_by_name("const_"+str(value))
+        sig.__value = value
+        sig.add_fanout(used_by)
+        return sig
+
 
     #default implementation assumes name of component specifies an output signal, can be overwritten
-    def init_name(self, name, config):
-        ct.print_debug("Default implementation creates output {} for {}".format(name, type(self)))
-        config["output"] = name
+    def init_name(self, config):
+        ct.print_debug("Default implementation creates output {} for {}".format(self.name, type(self)))
+        config["output"] = self.name
         #self.out = Signal.get_by_name(name, self)
 
 
@@ -96,12 +113,11 @@ class Component():
     # create a netlist of components ant signals from a config dict 
     @classmethod
     def netlist_from_config(cls, config):
-
         for compname, compconfig in config.items():
             modname = "components." + compname
             classname = "".join(word[0].upper() + word[1:] for word in compname.split("_"))
             #output heading for each part type in blue
-            ct.print_heading("Initializing part: {} (import {} from {})".format(compname, classname, modname))
+            ct.print_heading("Initializing component: {} (import {} from {})".format(compname, classname, modname))
             try:
                 imported = __import__("components." + compname, globals(), locals(), [classname])
             except Exception as e:
@@ -116,16 +132,23 @@ class Component():
 
             try:
                 cls.boot(compconfig)
+                ct.print_info("booting {}".format(cls.__name__))
             except Exception as e:
                 ct.format_exception(e, "Class boot failed:")
                 raise e
                 continue
+        cls.first_eval_all()
+
+    @staticmethod
+    def setup_services(board, scheduler):
+        Component.board = board
+        Component.scheduler = scheduler
 
     #call first_eval on all components in arbitraray order. A partial ordering would be nice instead
     #
     @classmethod
     def first_eval_all(cls):
-        for comp in Component.by_name.items():
+        for comp in Component.by_name.values():
             comp.first_eval()
 
     #first eval must ensure that no outputs have value none
@@ -147,6 +170,11 @@ class Component():
         
     @classmethod
     def print_netlist(cls):
+        cls.print_components()
+        Signal.print_signals()
+    
+    @classmethod
+    def print_components(cls):
         for name, comp in Component.by_name.items():
             ct.print_heading("component {} of type {}".format(name, type(comp)))
             ct.print_info(str(comp))
@@ -160,6 +188,12 @@ class Component():
 
 # a sginal passes a value change initiated by its source to all of its fanout components
 class Signal():
+    @classmethod
+    def print_signals(cls):
+        for sig in Signal.by_name.values():
+            ct.print_heading(str(sig))
+            for fanout in sig.fanouts:
+                ct.print_info(fanout.name)
 
     def __str__(self):
         return "{:>5} = signal {}".format(self.value, self.name)
@@ -191,10 +225,13 @@ class Signal():
             ct.print_debug("creating constant")
             return cls.constant(input_string, component)
 
+        
         match = Expression.name_re.match(input_string)
 
+
+            
         # a simple case is a direct assignment of a signal
-        if match.end() == len(input_string):
+        if len(match.group(0)) == len(input_string):
             ct.print_debug("direct assignment")
             sig = cls.get_by_name(input_string)
             sig.add_fanout(component)
@@ -204,6 +241,7 @@ class Signal():
         signal_name = ("_".join((component.name, port)))
         expr = Expression(signal_name, input_string)
         Component.by_name[signal_name] = expr
+        expr.output.add_fanout(component)
         return expr.output
 
     @classmethod
@@ -297,8 +335,9 @@ class Expression(Component):
         setattr(self, "output", out)
 
     def eval(self):
-        self.output.value = eval(self.python, self.expr_globals, self.expr_locals)
+        val = eval(self.python, self.expr_globals, self.expr_locals)
         ct.print_debug("evaluating {} to {}".format(self.name, self.output.value))
+        self.output.value = val
 
 
     def _replace_in_expr(self, match):        

@@ -7,12 +7,12 @@ from color_text import ColorText as ct
 #
 #   A1.1/slow_pwm:
 #     period: 60     #pwm perdiod is 60 seconds
-#     ration: 0.6    #60% of the period the signal is high
+#     ratio: 0.6    #60% of the period the signal is high
 
 class SlowPwm(FixedPeriodPart):
 
     def __init__(self, key, content):
-        self.topic = key
+        self.topic = keymkdir 
         self.value = False
         self.schedule_period_from_dict(content)
         self.current_ratio = 0.5
