@@ -13,7 +13,7 @@ class SlowPwm(Component, Task):
         "output":   (None, None, None)
     }
 
-    def post_init(self):
+    def post_init(self, config):
         self.reset_task = CallbackTask(self.reset)
         self.update(Component.scheduler)
         Component.scheduler.register(self)

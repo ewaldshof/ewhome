@@ -1,7 +1,6 @@
 import errno
 import machine
 import ujson
-from parts import Part
 from components import Component
 from uos import mkdir
 from color_text import ColorText as ct

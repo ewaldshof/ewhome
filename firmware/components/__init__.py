@@ -57,12 +57,15 @@ class Component():
         ct.print_debug("Initializing Outputs")
         self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name)
 
+
+        self.post_init(config)
+
         # when done there should be no connections left in configuration
-        assert len(config) == 0, "unmatched connections".format(config)
-        self.post_init()
+        if len(config) != 0:
+            ct.print_warning("unmatched connections".format(config.items()))
 
     # this is call during netlist creation directly after __init__
-    def post_init(self):
+    def post_init(self, config):
         pass
 
     #default behhaviour for params is to make them a constant signal
@@ -118,6 +121,11 @@ class Component():
             classname = "".join(word[0].upper() + word[1:] for word in compname.split("_"))
             #output heading for each part type in blue
             ct.print_heading("Initializing component: {} (import {} from {})".format(compname, classname, modname))
+
+            if compconfig is None:
+                ct.print_warning("Component list for {} is empty".format(compname))
+                continue
+
             try:
                 imported = __import__("components." + compname, globals(), locals(), [classname])
             except Exception as e:
@@ -231,7 +239,7 @@ class Signal():
 
             
         # a simple case is a direct assignment of a signal
-        if len(match.group(0)) == len(input_string):
+        if match is not None:
             ct.print_debug("direct assignment")
             sig = cls.get_by_name(input_string)
             sig.add_fanout(component)
@@ -267,9 +275,10 @@ class Signal():
 
     def __setValue(self, val):
         # no change, no None
-        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
-        if self.last_value == val:
+        if self.__value == val:
             return 
+
+        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
 
         self.last_value = self.__value
         self.__value = val
