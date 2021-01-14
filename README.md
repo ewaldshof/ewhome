@@ -6,32 +6,3 @@ See [https://github.com/ewaldshof/ewhome/wiki] for documentation.
 
 
 
-## Statusanzeige
-
-Die Boards sind mit 8 Zeilen à 16 Zeichen Monochrom-Displays ausgestattet, die folgende Informationen zeigen:
-
-```text
-Name d. Boards
-0.8.0
-
-
-
-
-b4 e6 2d 8f c8 29
-M WL OK: .123 <3
-```
-
-Die zweite Zeile zeigt die Softwareversion an, die vorletzte Zeile die MAC-Adresse des WLAN-Adapters.
-
-In der letzten Zeile finden sich Statusinformationen:
-
-* `M`, wenn eine Verbindung zum MQTT-Server besteht.
-* WLAN-Statusinformationen (`WL`):
-  * `Init ...` wenn der Netzwerk-Stack noch nicht initialisiert wurde.
-  * `Starting` beim Starten eines Verbindungsaufbaus.
-  * `Trying..` während die Verbindung aufgebaut wird.
-  * `Wrong PW` falls das WLAN-Passwort (gesetzt in `ewh_net.py` nicht korrekt ist).
-  * `OK: .123` wenn eine Verbindung besteht. Das letzte Byte der Adresse wird angezeigt.
-  * `Unknown` wenn es für das Statusflag kein passendes `if` im Code gibt.
-* `<3` ist ein jede Sekunde rhythmisch blinkender Herzschlag, der zeigt, ob das Board gecrasht ist.
-
