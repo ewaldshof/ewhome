@@ -140,7 +140,7 @@ class Component():
 
             try:
                 cls.boot(compconfig)
-                ct.print_info("booting {}".format(cls.__name__))
+                ct.print_info("booted {}".format(cls.__name__))
             except Exception as e:
                 ct.format_exception(e, "Class boot failed:")
                 raise e
@@ -204,7 +204,7 @@ class Signal():
                 ct.print_info(fanout.name)
 
     def __str__(self):
-        return "{:>5} = signal {}".format(self.value, self.name)
+        return "{:>5} = signal {}".format(str(self.value), self.name)
 
     by_name = {}
 
@@ -283,6 +283,9 @@ class Signal():
         self.last_value = self.__value
         self.__value = val
 
+        self.notify_fanouts()
+
+    def notify_fanouts(self):
         for component in self.fanouts:
             component.on_input_change(self)
 
