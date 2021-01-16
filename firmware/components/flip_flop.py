@@ -1,6 +1,7 @@
 """
 Implement a D-Flip-Flop with optional asynchronous set and reset signals.
-Precendence of input is Reset > Set > CLK (rising edge)
+Precendence of input is Reset > Set > CLK  (rising edge) = strobe
+strobe behaves just as clk but on any value change. 
 Enable does not affect set and reset
 """
 from color_text import ColorText as ct
@@ -9,6 +10,7 @@ class FlipFlop(Component):
     #default, min, max
     inputs = {
         "clk":    (False, None, None),
+        "strobe": (False, None, None),
         "input":  (0, None, None),
         "enable": (True, None, None),
         "set":    (False, None, None),
@@ -38,5 +40,6 @@ class FlipFlop(Component):
         if self.enable.value < 0.5:
             return            
 
-        if signal is self.clk and signal.rising_edge():
+        if (signal is self.clk and signal.rising_edge()) or (signal is self.strobe and signal.has_changed()):
             self.output.value = self.input.value 
+    
