@@ -10,6 +10,7 @@ if os.__name__ == "uos":
     import ure as ure
 else:
     import re as ure
+import builtins
 import time as utime
 #import ure
 #import utime
@@ -243,7 +244,7 @@ class Signal():
 
             
         # a simple case is a direct assignment of a signal
-        if match is not None:
+        if match is not None and match.group(0) == input_string:
             ct.print_debug("direct assignment")
             sig = cls.get_by_name(input_string)
             sig.add_fanout(component)
@@ -272,22 +273,18 @@ class Signal():
         return self.last_value != self.value
     
     def rising_edge(self, threshold = 0.5):
-        return self.has_changed and self.value > threshold 
+        return self.has_changed() and self.value > threshold 
 
     def falling_edge(self, threshold = 0.5):
-        return self.has_changed and self.value <= threshold 
+        return self.has_changed() and self.value <= threshold 
 
     def __setValue(self, val):
         # no change, no None
-        if self.__value == val:
-            return 
-
-        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
-
         self.last_value = self.__value
-        self.__value = val
-
-        self.notify_fanouts()
+        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
+        if self.__value != val:
+            self.__value = val
+            self.notify_fanouts()
 
     def notify_fanouts(self):
         for component in self.fanouts:
@@ -338,8 +335,15 @@ class Expression(Component):
             "mqtt_get_value": None #MQTT.get_cached_or_raise,
         }
 
-    reserved_names = {"name", "expr_locals", "python", "output"}
-
+    reserved_names = {"name", "expr_locals", "python", "output", 
+                    "import", "from", "return", "yield", "assert", 
+                    "break", "continue", "global", "pass"}
+    keywords = {"Flase", "def", "if", "raise",
+                "None", "del", "True", "elif", "in", "try", 
+                "and", "else", "is", "while",
+                "as", "except", "lambda", "with", "finally", "nonlocal",
+                "for", "not", "class", "or" 
+                }
 
     def __init__(self, result_name, expression_string):
         self.name = result_name 
@@ -351,8 +355,12 @@ class Expression(Component):
         setattr(self, "output", out)
 
     def eval(self):
-        val = eval(self.python, self.expr_globals, self.expr_locals)
-        ct.print_debug("evaluating {} to {}".format(self.name, self.output.value))
+        try:
+            val = eval(self.python, self.expr_globals, self.expr_locals)
+        except Exception as e:
+            ct.format_exception(e, "evaluation of expression failed") 
+            ct.print_error(str(self.python))
+            val = 0
         self.output.value = val
 
 
@@ -361,6 +369,12 @@ class Expression(Component):
         ct.print_debug("processing match {}".format(name))
         if  name in Expression.expr_globals:
             ct.print_debug("ignoring global function name: {}".format(name))
+            return name
+        if name in dir(builtins):
+            ct.print_debug("ignoring builtin name: {}".format(name))
+            return name
+        if name in Expression.keywords:
+            ct.print_debug("ignoring keyword: {}".format(name))
             return name
         assert name not in Expression.reserved_names, "reserved names can't be used in expressions: {}".format(name)
 
