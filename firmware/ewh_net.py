@@ -2,6 +2,7 @@ import network as net
 from task import Task
 from ubinascii import hexlify
 import ujson
+import ntptime
 
 class Network(Task):
 
@@ -34,6 +35,8 @@ class Network(Task):
             if ip != self.ip:
                 self.ip = ip
                 self.short_ip = "{:>4s}".format(ip[ip.rindex("."):])
+            msg = "NTP " + self.short_ip
+            ntptime.settime() # this takes to long. Better schedule a task for that
             msg = "OK: " + self.short_ip
         else:
             msg = "Unknown"

@@ -6,6 +6,7 @@ from heartbeat import Heartbeat
 from name import Name
 from mqtt import MQTT
 from task import Scheduler
+import ntptime
 
 network = Network()
 MQTT.init(network)
@@ -13,7 +14,9 @@ MQTT.init(network)
 board = Board(network)
 board.init()
 
+
 heartbeat = Heartbeat(board.display)
+
 
 scheduler = Scheduler()
 
@@ -28,3 +31,4 @@ scheduler.register(MQTT.task)
 print("Starting scheduler of version {0}".format(config.version))
 
 scheduler.start(100)
+
