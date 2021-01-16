@@ -5,7 +5,11 @@
 # This implementation currently only allows for one gloabel netlist that is stored as a class variable.
 
 from color_text import ColorText as ct
-import ure as ure
+import os
+if os.__name__ == "uos":
+    import ure as ure
+else:
+    import re as ure
 import time as utime
 #import ure
 #import utime
