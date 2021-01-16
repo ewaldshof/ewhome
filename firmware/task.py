@@ -17,7 +17,7 @@ class Task():
 
 class CallbackTask(Task):
     #callback task only run once per default, set interval if you intend otherwise
-    def __init__(self, callback, countdown = 1000, interval = -1):
+    def __init__(self, callback=None, countdown = 1000, interval = -1):
         self.callback = callback
         super().__init__(countdown, interval)
         

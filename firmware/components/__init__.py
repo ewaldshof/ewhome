@@ -32,7 +32,9 @@ class Component():
    # same for parameters, these can't be changed after initialisation
     params = {}
 
-    #outputs don't need defaults, initialize them all to (None, None, None) 
+    #outputs don't need defaults, 
+    # initialize them all to (None, None, None) if they are mandatory
+    # or (False, None, None) if they are optional
     outputs = {}
 
     # init is called during netlist creation
@@ -60,7 +62,7 @@ class Component():
         self.init_ports_from_dict(config, type(self).params, type(self).init_param)
         #create additional outputs, sets self as source
         ct.print_debug("Initializing Outputs")
-        self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name)
+        self.init_ports_from_dict(config, type(self).outputs, Signal.get_by_name, False)
 
 
         self.post_init(config)
@@ -94,13 +96,14 @@ class Component():
         #self.out = Signal.get_by_name(name, self)
 
 
-    def init_ports_from_dict(self, config, names_and_constraints, signal_creation_method):
+    def init_ports_from_dict(self, config, names_and_constraints, signal_creation_method, check_mandatory = True):
         for name  in names_and_constraints:
             (default, minimum, maximum) = names_and_constraints[name]
             ct.print_debug("{} {} {} {}".format(name, default, minimum, maximum))
             line_config = config.pop(name, None)
             if line_config is None:
-                assert default is not None, "mandatory port {} missing".format(name)
+                if check_mandatory:
+                    assert default is not None, "mandatory port {} missing".format(name)
                 sig = Signal.constant(default, self)
             else:
                 sig = signal_creation_method(line_config, self, name)
