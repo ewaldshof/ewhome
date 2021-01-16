@@ -16,7 +16,7 @@ from color_text import ColorText as ct
     ds18x20:
         2-1:
             period:             10
-            unmatched_sensors:  unmatched_sensors            # a list of signals for the unmatched sensors
+            unidentified_sensors:  unmatched_sensors            # a list of signals for the unmatched sensors
             28ff3482b0160315:   1st_sensor_pin_2_1
             28fff97c90170532:   2nd_sensor_pin_2_1
         1-5:
@@ -49,6 +49,7 @@ class Ds18x20(Component, Task):
 
         #it may be necessary to identify connected senors, so we provide a list
         line_config = config.pop("unidentified_sensors", None)
+        self.unidentified_sensors_signal = None
         if line_config is not None:
             self.unidentified_sensors_signal       = Signal.get_by_name(line_config, self)
         
