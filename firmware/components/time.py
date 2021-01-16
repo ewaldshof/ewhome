@@ -19,9 +19,9 @@ class Time(Component, Task):
         "minute":  (None, None, None),
         "second":  (None, None, None),  
         "weekday": (None, None, None),  # 0 = monday, 6= sunday
-        "yearday": (None, None, None),  # 1 for januar first up to 365
+        "yearday": (None, None, None),  # 1 for januar first up to 366
         "phase":   (None, None, None),  # time of update in ms since interval startet, shoudd be about 500
-        "time":    (None, None, None)   # seconds since epoch
+        "tupel":    (None, None, None)   # seconds since epoch
     }
 
 # later this should check for the minimum necessary freuency and schedule on that
@@ -33,17 +33,18 @@ class Time(Component, Task):
 
 
     def update(self, scheduler):
-        self.output.value = utime.localtime()
+        self.tupel.value = utime.localtime()
         (self.year.value,
          self.month.value,
-         self.hour.value,
          self.day.value,
+         self.hour.value,
          self.minute.value,
          self.second.value,
          self.weekday.value,
          self.yearday.value) =  self.output.value
 
-        self.time.value = utime.time()
+        self.output.value = utime.time()
+
         # implemnt a dll to make sure we don't skip seconds
         # we try to brun half a second after the interval started
         self.phase.value = utime.ticks_ms() % self.interval
