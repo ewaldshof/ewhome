@@ -273,10 +273,10 @@ class Signal():
         return self.last_value != self.value
     
     def rising_edge(self, threshold = 0.5):
-        return self.has_changed() and self.value > threshold 
+        return self.has_changed() and self.value >= threshold 
 
     def falling_edge(self, threshold = 0.5):
-        return self.has_changed() and self.value <= threshold 
+        return self.has_changed() and self.value < threshold 
 
     def __setValue(self, val):
         # no change, no None

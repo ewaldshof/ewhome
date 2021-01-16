@@ -1,5 +1,5 @@
 """
-Implement a D-Flip-Flop with optional asynchrones set and reset signals.
+Implement a D-Flip-Flop with optional asynchronous set and reset signals.
 Precendence of input is Reset > Set > CLK (rising edge)
 Enable does not affect set and reset
 """
@@ -35,7 +35,7 @@ class FlipFlop(Component):
             self.output.value = 1
             return
 
-        if self.enable.value <= 0:
+        if self.enable.value < 0.5:
             return            
 
         if signal is self.clk and signal.rising_edge():
