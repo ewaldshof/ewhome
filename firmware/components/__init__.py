@@ -102,13 +102,23 @@ class Component():
             ct.print_debug("{} {} {} {}".format(name, default, minimum, maximum))
             line_config = config.pop(name, None)
             if line_config is None:
-                if check_mandatory:
-                    assert default is not None, "mandatory port {} missing".format(name)
-                sig = Signal.constant(default, self)
+                if default is None: 
+                    assert not check_mandatory, "mandatory port {} missing".format(name)
+                    sig = None
+                else: 
+                    sig = Signal.constant(default, self)
             else:
                 sig = signal_creation_method(line_config, self, name)
             setattr(self, name, sig) 
     
+    # automatically only connected outputs are created.
+    # for some components it is usefull to have all outputs
+    def create_all_outputs(self):
+        for name in self.outputs:
+            if not hasattr(self, name):
+                signal_name = "_output_".join((self.name, name))
+                setattr(self, name, Signal.get_by_name(signal_name, self))
+                
 
     @classmethod
     def init_class(cls, config):
@@ -261,6 +271,11 @@ class Signal():
         return expr.output
 
     @classmethod
+    def set(cls, signal, value):
+        if signal is not None:
+            signal.value = value
+
+    @classmethod
     def set_by_name(cls, name, value):
         Signal.get_by_name(name).value = value
 
@@ -284,8 +299,8 @@ class Signal():
     def __setValue(self, val):
         # no change, no None
         self.last_value = self.__value
-        ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
         if self.__value != val:
+            ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
             self.__value = val
             self.notify_fanouts()
 
