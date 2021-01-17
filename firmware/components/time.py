@@ -28,12 +28,16 @@ class Time(Component, Task):
 
     def post_init(self, config):
         # self.create_all_outputs()
+        
         self.interval = 1000
         self.update(Component.scheduler)
+
         Component.scheduler.register(self)
 
     def update(self, scheduler):
         tupel = utime.localtime()
+        
+        #outputs are not guaranteed to exist so we set them by helper function
         Signal.set(self.tupel,   tupel)
         Signal.set(self.year,    tupel[0])
         Signal.set(self.month,   tupel[1])
@@ -43,10 +47,10 @@ class Time(Component, Task):
         Signal.set(self.second,  tupel[5])
         Signal.set(self.weekday, tupel[6])
         Signal.set(self.yearday, tupel[7])
-        Signal.set(self.phase,   utime.ticks_ms())
-        self.output.value = utime.time()
+        Signal.set(self.output,  utime.time())
 
         # implemnt a dll to make sure we don't skip seconds
         # we try to brun half a second after the interval started
-        self.phase.value = utime.ticks_ms() % self.interval
-        self.countdown = self.interval + 500 - self.phase.value
+        phase = utime.ticks_ms() % self.interval
+        Signal.set(self.phase,   phase)
+        self.countdown = self.interval + 500 - phase
