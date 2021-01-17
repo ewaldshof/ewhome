@@ -9,7 +9,6 @@ from components import Component, Signal
 class FlipFlop(Component):
     #default, min, max
     inputs = {
-        "clk":    (False, None, None),
         "strobe": (False, None, None),
         "input":  (0, None, None),
         "enable": (True, None, None),
@@ -40,6 +39,6 @@ class FlipFlop(Component):
         if self.enable.value < 0.5:
             return            
 
-        if (signal is self.clk and signal.rising_edge()) or (signal is self.strobe and signal.has_changed()):
+        if (signal is self.strobe and signal.has_changed()):
             self.output.value = self.input.value 
     
