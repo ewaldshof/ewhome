@@ -6,7 +6,9 @@ from mqtt import MQTT
 from color_text import ColorText as ct
 class Exports(Component):
     inputs = {
-        "input":          (None, None, None)
+        "input":        (None, None, None),
+        "auto":         (True, None, None), # if set, any change is published immediately. Otherwise wait for strobe
+        "strobe":       (0, None, None)     # publish if this signal changes
     }
 
     # TODO
@@ -16,7 +18,12 @@ class Exports(Component):
     def init_name(self, config):
         pass
 
-    def eval(self):
+    def first_eval(self):
         MQTT.publish(self.name, self.input.value, True, True )
-        #MQTT.client.publish(self.name, str(self.input.value), True)
+
+    def on_input_change(self, signal):
+        if  ( signal == self.strobe or
+             (signal == self.input and self.auto.value >= 0.5)):  
+            MQTT.publish(self.name, self.input.value, True, True )
+            
  

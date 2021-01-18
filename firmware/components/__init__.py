@@ -75,8 +75,8 @@ class Component():
     def post_init(self, config):
         pass
 
-    #default behhaviour for params is to make them a constant signal
-    # maybe we can reorder the paarmeters of the singnal_creation_methode to make this a mamber function
+    #default behaviour for params is to make them a constant signal
+    # maybe we can reorder the paarmeters of the singnal_creation_methode to make this a member function
     @classmethod
     def init_param(cls, value, component, param_name):
         Signal.constant(value, self2, name)
@@ -364,13 +364,18 @@ class Expression(Component):
                 }
 
     def __init__(self, result_name, expression_string):
-        self.name = result_name 
+        self.set_name(result_name) 
+
         matches = Expression.name_re.match(expression_string)
         self.expr_locals = {}
         self.python = Expression.name_re.sub(self._replace_in_expr, expression_string)
         ct.print_info("Expression = {}".format(self.python))
-        out = Signal.get_by_name(result_name, self)
+        out = Signal.get_by_name(self.name, self)
         setattr(self, "output", out)
+     
+    # Inports can have / in names
+    def set_name(self, name):
+        self.name = name.replace("/", "_")
 
     def eval(self):
         try:
