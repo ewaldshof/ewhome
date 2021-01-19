@@ -1,5 +1,5 @@
 from components import Component, Signal
-from task import Task, CallbackTask
+from task import Task
 
 from ds18x20 import DS18X20
 from onewire import OneWire
@@ -15,8 +15,8 @@ from color_text import ColorText as ct
 """
     ds18x20:
         2-1:
-            period:             10
-            unidentified_sensors:  unmatched_sensors            # a list of signals for the unmatched sensors
+            start_conversion:  minutes   # from time component
+            conversion_finished:         # changes after temperatures are read, about 800ms afer conversion was startet
             28ff3482b0160315:   1st_sensor_pin_2_1
             28fff97c90170532:   2nd_sensor_pin_2_1
         1-5:
@@ -25,7 +25,12 @@ from color_text import ColorText as ct
 
 class Ds18x20(Component, Task):
     inputs = {
-        "period":   (60, 2, 60*60*24)
+        "start_conversion":   (None, None, None),
+    }
+    outputs = {
+        "stable":              (None, None, None), # False during conversion, True otherwise
+        "ids":                 (None, None, None), # list of all IDs
+        "temperatures":        (None, None, None)  # list of all temperatures 
     }
 
 
@@ -35,70 +40,48 @@ class Ds18x20(Component, Task):
         self.pin = Component.board.get_pin(self.name)
         self.ds = DS18X20(OneWire(self.pin))
         addresses = self.ds.scan()
-        self.sensors = set()
-        self.unidentified_sensors = set()
+        self.sensors = []
+
+        read_all_sensors = ("ids" in config) or ("temperatures" in config)
 
         for address in addresses:
             hex_address = Sensor.to_hex_address(address)
+            signal_name = None
+
             if  hex_address in config:
-                signal_name = config.pop(hex_address)
-                self.sensors.add(Sensor(address, self, signal_name))
-            else:
-                signal_name = "sensor_{}".format(hex_address)
-                self.unidentified_sensors.add(Sensor(address, self, signal_name))
-
-        #it may be necessary to identify connected senors, so we provide a list
-        line_config = config.pop("unidentified_sensors", None)
-        self.unidentified_sensors_signal = None
-        if line_config is not None:
-            self.unidentified_sensors_signal       = Signal.get_by_name(line_config, self)
-        
-#        self.update_unidentified()
-
-    
-
+                sensor = Sensor(address, self, config.pop(hex_address))
+                self.sensors.append(sensor)         
+            elif read_all_sensors:
+                sensor = Sensor(address, self, None)
+                self.sensors.append(sensor)
+            
         ct.print_info("Found {} DS18x20 sensors.".format(len(self.sensors)))
         ct.print_debug("\n".join(str(x) for x in self.sensors))
+        self.countdown = self.interval = -1
 
-    def update_unidentified(self):
-        if self.unidentified_sensors_signal is not None:
-            for sensor in self.unidentified_sensors:
-                sensor.read_temp(self.ds)
-            self.unidentified_sensors_signal.value = self.unidentified_sensor_string()
- 
-    def unidentified_sensor_string(self):
-        return "\n".join(map(str, self.unidentified_sensors))
 
-    #during post_init the config contains only sensor ids
-    def post_init(self, config):
-        self.readout_task = CallbackTask(self.readout, 750)
-        self.interval = self.countdown = self.period.value * 1000
-        if len(self.sensors) > 0:
-            Component.scheduler.register(self)
-        elif len(self.unidentified_sensors) > 0 and self.unidentified_sensors is not None:
-            Component.scheduler.register(self)
+    def first_eval(self):
+        self.stable.value = False        
+        self.ids.value = [s.hex_address() for s in self.sensors]
+        self.ids.notify_fanouts()
         
+    def on_input_change(self, signal):
+        if signal == self.start_conversion and self.countdown <= 0:
+            self.countdown = 750
+            self.interval = -1
+            Component.scheduler.register(self)
+            self.stable.value = False
+            self.ds.convert_temp()
+            ct.print_debug("converting temperatures")
+
     def update(self, scheduler):
-        self.interval = self.countdown = self.period.value * 1000
-
-        # Ask for the results in 750ms or more (required by the sensors).
-        self.readout_task.countdown =750
-        scheduler.register(self.readout_task)
-        # Request the temperature conversion.
-        self.ds.convert_temp()
-        ct.print_debug("converting temperatures")
-
-
-    def readout(self):
         ct.print_debug("reading temperatures from pin {}".format(self.name))
-
-        # We've waited enough for the sensor(s). Read the temperatures.
-        for sensor in self.sensors:
-            sensor.read_temp(self.ds)
-
+        # We've waited enough for the sensor(s). Read the temperatures.      
+        self.temperatures.value = [s.read_temp(self.ds) for s in self.sensors]
+        self.stable.value = True
+        self.temperatures.notify_fanouts()
         
-        self.update_unidentified()
-
+        
 
 
 class Sensor:
@@ -108,18 +91,21 @@ class Sensor:
 
     def __init__(self, address, component, signal_name):
         self.address = address
-        ct.print_debug("mapped sensor {} to {}".format(self.hex_address(), signal_name))
-        self.signal = Signal.get_by_name(signal_name, component)
+        if signal_name is not None:
+            ct.print_debug("mapped sensor {} to {}".format(self.hex_address(), signal_name))
+            self.signal = Signal.get_by_name(signal_name, component)
 
     
     def read_temp(self, ds):
         ct.print_debug("reading temperatures from {} for {}".format(self.hex_address(), self.signal.name))
+        temperature = -272.0
         try:
             temperature = ds.read_temp(self.address)
-            self.signal.value = round(temperature,2)
+            if self.signal is not None:
+                self.signal.value = round(temperature,2)
         except Exception as e:
             ct.format_exception(e, "Exception in ds18x20 update for {}".format(self.signal.name))        
-
+        return temperature
 
     def hex_address(self):
         return Sensor.to_hex_address(self.address)

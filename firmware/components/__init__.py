@@ -300,9 +300,10 @@ class Signal():
         # no change, no None
         self.last_value = self.__value
         if self.__value != val:
-            ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
             self.__value = val
-            self.notify_fanouts()
+            if self.fanouts:
+                ct.print_debug("setting {} from {} to {}".format(self.name, self.last_value, val))
+                self.notify_fanouts()
 
     def notify_fanouts(self):
         for component in self.fanouts:

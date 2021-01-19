@@ -17,7 +17,7 @@ class Counter(Component):
         "increment":    (1, None, None),
         "decrement":    (1, None, None),
         "reload_value": (0, None, None),
-        "load_value":   (1, None, None),
+        "load_value":   (0, None, None),
         "load":         (False, None, None),
         "enable":       (1, None, None)    
     }
