@@ -14,7 +14,7 @@ except ImportError:
 
 config_file = "ewhome.yaml" if len(sys.argv) < 2 else sys.argv[1]
 
-broker_address = "10.0.0.88"
+broker_address = "10.10.10.110"
 topic_conf_complete = "ewhome/config"
 topic_base = "ewhome/"
 all_published = False

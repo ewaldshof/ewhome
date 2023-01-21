@@ -91,9 +91,10 @@ class Sensor:
 
     def __init__(self, address, component, signal_name):
         self.address = address
-        if signal_name is not None:
-            ct.print_debug("mapped sensor {} to {}".format(self.hex_address(), signal_name))
-            self.signal = Signal.get_by_name(signal_name, component)
+        if signal_name is None:
+            signal_name = "t_{}".format(self.hex_address())
+        ct.print_debug("mapped sensor {} to {}".format(self.hex_address(), signal_name))
+        self.signal = Signal.get_by_name(signal_name, component)
 
     
     def read_temp(self, ds):
