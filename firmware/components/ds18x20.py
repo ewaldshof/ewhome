@@ -2,7 +2,7 @@ from components import Component, Signal
 from task import Task
 
 from ds18x20 import DS18X20
-from onewire import OneWire
+from onewire import OneWire, OneWireError
 import time
 from ubinascii import hexlify
 from color_text import ColorText as ct 
@@ -71,7 +71,10 @@ class Ds18x20(Component, Task):
             self.interval = -1
             Component.scheduler.register(self)
             self.stable.value = False
-            self.ds.convert_temp()
+            try:
+                self.ds.convert_temp()
+            except OneWireError:
+                ct.print_debug("OneWireError in convert_temp ...")
             ct.print_debug("converting temperatures")
 
     def update(self, scheduler):
