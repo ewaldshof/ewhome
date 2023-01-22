@@ -8,3 +8,6 @@
 /.env
 
 /deploy/**
+
+/config/ewhome_**
+/config/raeume**
