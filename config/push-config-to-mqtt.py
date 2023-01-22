@@ -46,7 +46,7 @@ def on_connect(client, userdata, flags, rc):
 
     # and also create one topic per board 
     # this should be the norm for the future
-    if "esp" in yaml_config:
+    if "esps" in yaml_config:
         print(yaml_config["esps"].keys())
         for key, value in yaml_config["esps"].items():
             print(key, value)

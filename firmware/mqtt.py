@@ -24,7 +24,7 @@ class MQTT(Task):
     task = None
 
     @classmethod 
-    def prefix(cld, topic, use_prefix = True):
+    def prefix(cld, topic, use_prefix = True): # FIXME Typo? sollte cls heissen?
         return "/".join([MQTT.PREFIX, topic]) if use_prefix else topic
 
     @classmethod
