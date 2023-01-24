@@ -6,5 +6,10 @@ It is currently running on ESP32 but should be easy to port to any device that i
 
 See [https://github.com/ewaldshof/ewhome/wiki] for documentation.
 
+Added private git repo with configs as git submodule. 
 
-
+After checkout run:
+```bash
+git submodule init
+git submodule update
+```
