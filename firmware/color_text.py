@@ -30,7 +30,7 @@ class ColorText():
 
     @classmethod 
     def print_error(cls, text):
-        cls(text).error().show()
+        cls(str(text)).error().show()
 
     @classmethod 
     def print_ok(cls, text):

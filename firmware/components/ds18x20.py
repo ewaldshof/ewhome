@@ -74,7 +74,7 @@ class Ds18x20(Component, Task):
             try:
                 self.ds.convert_temp()
             except OneWireError:
-                ct.print_debug("OneWireError in convert_temp ...")
+                ct.print_error("OneWireError in convert_temp ...")
             ct.print_debug("converting temperatures")
 
     def update(self, scheduler):
