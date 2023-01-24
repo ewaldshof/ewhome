@@ -11,6 +11,9 @@ build = "./build.sh"
 repl = "rshell repl"
 sync-code = "./build.sh -d"
 
+bumpminor = "bump2version minor --verbose --dry-run"
+bumpmajor = "bump2version major --verbose --dry-run"
+
 [packages]
 esptool = "*"
 rshell = "*"
