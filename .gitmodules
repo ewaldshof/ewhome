@@ -1,0 +1,3 @@
+[submodule "ewaldshof_config"]
+	path = ewaldshof_config
+	url = git@github.com:ewaldshof/ewaldshof_config.git
