@@ -10,7 +10,6 @@ flash-micropython = "esptool.py --chip esp32 write_flash -z 0x1000 micropython/$
 build = "./build.sh"
 repl = "rshell repl"
 sync-code = "./build.sh -d"
-
 bumpminor = "bump2version minor --verbose --dry-run"
 bumpmajor = "bump2version major --verbose --dry-run"
 
@@ -21,6 +20,7 @@ pyyaml = "*"
 pylint = "*"
 paho-mqtt = "*"
 bump2version = "*"
+adafruit-ampy = "*"
 
 [dev-packages]
 
