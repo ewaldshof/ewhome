@@ -17,3 +17,8 @@ After checkout run:
 git submodule init
 git submodule update
 ```
+
+To update submodule run:
+```bash
+git submodule update --remote
+```
