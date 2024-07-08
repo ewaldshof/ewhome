@@ -367,9 +367,9 @@ class Expression(Component):
     def __init__(self, result_name, expression_string):
         self.set_name(result_name) 
 
-        matches = Expression.name_re.match(expression_string)
+        matches = Expression.name_re.match(str(expression_string))
         self.expr_locals = {}
-        self.python = Expression.name_re.sub(self._replace_in_expr, expression_string)
+        self.python = Expression.name_re.sub(self._replace_in_expr, str(expression_string))
         ct.print_info("Expression = {}".format(self.python))
         out = Signal.get_by_name(self.name, self)
         setattr(self, "output", out)
