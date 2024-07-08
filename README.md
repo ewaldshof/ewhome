@@ -6,6 +6,10 @@ It is currently running on ESP32 but should be easy to port to any device that i
 
 See [https://github.com/ewaldshof/ewhome/wiki] for documentation.
 
+> [!NOTE]
+> For production use we recommend [ESPHome](https://esphome.io/). It is much more active, mature, stable and complete than this project.
+> However, EWHome has some unique concepts. For example there is no compile time, much less dependencies, it needs no dedicated server except for MQTT. If you are interested in any of this you are very welcome to contribute.
+
 Added private git repo with configs as git submodule. 
 
 After checkout run:
